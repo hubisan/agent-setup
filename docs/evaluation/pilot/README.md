@@ -31,9 +31,9 @@ python3 "$SOURCE/scripts/install.py" preview --target "$TARGET" \
   --guard-providers "$GUARD" --telemetry-providers "$TELEMETRY"
 ```
 
-Inspect the preview, then use the identical options with `apply --approve APPROVAL_FROM_PREVIEW`. If using a verified capability inventory, include the corresponding flag in **both** commands, as in [adoption](../../adoption.md). Never auto-approve a real target from a script. Verify `status` and the generated profile plan, and commit the fixture plus reviewed installed configuration in this disposable Git repository using the normal local Git workflow. This is the run's start revision. Do not push it, copy credentials, or commit local logs or settings from another project.
+Inspect the preview, then use the identical options with `apply --approve APPROVAL_FROM_PREVIEW`. If using a verified capability inventory, include the corresponding flag in **both** commands, as in [adoption](../../adoption.md). Never auto-approve a real target from a script. Verify `status` and the generated profile plan, and commit the fixture plus reviewed installed configuration in this disposable Git repository using the normal local Git workflow. Save that run's start revision with `START_REV=$(git -C "$TARGET" rev-parse HEAD)`. Do not push it, copy credentials, or commit local logs or settings from another project.
 
-Open the selected host in the target, follow its normal trust/permission prompts, and use a fresh session for the exact task from [cases](cases.md). Keep unrelated plugins, tools and instructions out of the comparison as far as the host allows; document any inherited configuration. Check actual instruction and delegate discovery independently of the model's self-report.
+Open the selected host from the target (`cd "$TARGET"` and launch `codex` or `claude` with the verified coordinator selection), follow its normal trust/permission prompts, and use a fresh session for the exact task from [cases](cases.md). Keep unrelated plugins, tools and instructions out of the comparison as far as the host allows; document any inherited configuration. Check actual instruction and delegate discovery independently of the model's self-report.
 
 ## 3. Run the smallest useful comparisons
 
@@ -42,7 +42,7 @@ Open the selected host in the target, follow its normal trust/permission prompts
 | A: smoke | Balanced, guard/telemetry off | S on each available host |
 | B: workflow | Same as A | N and C on each available host |
 | C: hook impact | Same balanced setup, guard and telemetry on for that host | Repeat N with identical inputs and coordinator; verify normal output is silent |
-| D: routing | Economy instead of balanced; hooks off in both | Repeat C if the earlier runs justify further spending |
+| D: routing | Economy instead of balanced; hooks off in both | Repeat task C if the earlier runs justify further spending |
 
 For C, set both GUARD and TELEMETRY to HOST when preparing its new target. For D use the existing economy profile, not ad hoc routing. Keep the baseline/variant within the same host; credits and token accounting are not interchangeable across providers. Do not run a full combinatorial matrix. Start with A, stop on a blocker, and review evidence before expanding. If cost measurements are too noisy or missing, report an inconclusive comparison rather than invent savings. A single paired run is exploratory.
 
@@ -53,7 +53,7 @@ Record class, actual steps, interruptions, context and unnecessary delegation; v
 From a trusted shell outside the coding session, review the candidate diff, then run:
 
 ```bash
-git -C "$TARGET" diff HEAD
+git -C "$TARGET" diff "$START_REV"
 git -C "$TARGET" status --short
 python3 "$SOURCE/docs/evaluation/pilot/check.py" "$CASE" "$TARGET"
 ```
