@@ -174,7 +174,7 @@ class HookTests(unittest.TestCase):
                     with self.subTest(provider=provider, mode=mode, event=event, fields=fields):
                         result = subprocess.run(
                             [sys.executable, str(self.runtime), provider, mode],
-                            input=json.dumps({'hook_event_name': event, **fields}),
+                            input=json.dumps({'hook_event_name': event, **fields}).encode(),
                             capture_output=True,
                             env={**os.environ, 'HOME': str(self.home)}, timeout=3)
                         self.assertEqual(result.returncode, 0)
