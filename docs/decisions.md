@@ -47,6 +47,6 @@ The following are agent-selected, reversible organisation choices, not additiona
 
 ## Decisions deferred until relevant evidence exists
 
-Exact provider model IDs/aliases, supported effort values, Claude role mappings, and fallback behaviour are implementation work. Do not infer them from profile names. Real savings, automatic skill activation, a replacement for `writing-for-agents`, and promotion of any optional coding skill remain unproven. Select the repository's distribution licence before the first packaged release; no licence is inferred from a public repository or from another project's licence.
+Initial provider model IDs and role mappings, including the inventory-driven Luna fallback, are now implemented as agent-selected proposals in the profile catalogue. Client-specific availability and override resolution still require verification. Do not infer them from profile names. Real savings, automatic skill activation, a replacement for `writing-for-agents`, and promotion of any optional coding skill remain unproven. Select the repository's distribution licence before the first packaged release; no licence is inferred from a public repository or from another project's licence.
 
 These decisions supersede the old mandatory skill chain, unconditional delegation, and Sol `high` escalation. They do not discard unrelated source-project requirements or turn the old APS historical audit into mandatory context.

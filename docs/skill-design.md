@@ -23,7 +23,7 @@ Keep the description short enough to distinguish the trigger. Keep `SKILL.md` fo
 | What does it cost? | Record available context/token/credit and elapsed-time observations, including delegates and retries; label unavailable data. |
 | Is it accepted? | Independent review and explicit user acceptance for that candidate, with evidence links and remaining host limitations. |
 
-Use a small repeatable pilot, not an elaborate evaluation platform. Do not infer a general win from one successful example. A skill's own claim that it ran is weaker than a host activation trace; successful manual use does not establish natural activation.
+Use the [small evaluation protocol and result template](evaluation/README.md), not an elaborate evaluation platform. Do not infer a general win from one successful example. A skill's own claim that it ran is weaker than a host activation trace; successful manual use does not establish natural activation.
 
 States are candidate, prototype, pilot, and accepted. A merged source PR, a valid package, or a previous UI pilot is not acceptance of a changed package on another host. Retest the changed behaviour rather than every historical scenario by default.
 

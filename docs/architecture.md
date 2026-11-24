@@ -16,7 +16,7 @@ ACS depends on the APS shared contract. This does not mean installing every APS 
 
 ## Source layout
 
-The existing foundation contains `modules/aps/README.md`, `modules/acs/WORKFLOW.md`, and task-specific documentation under `docs/`. The following implementation paths are planned; absent paths are not shipped functionality:
+The existing foundation contains `modules/aps/README.md`, `modules/acs/WORKFLOW.md`, and task-specific documentation under `docs/`. Profile tooling now lives in `profiles/catalog.json` and `scripts/profile.py`, with the two small native output adapters together in that script. Host capability notes live in `providers/README.md`; evaluation documents live in `docs/evaluation/`. The following broader layout remains a guide; absent paths are not shipped functionality:
 
 | Planned path | Contents |
 | --- | --- |
@@ -24,7 +24,7 @@ The existing foundation contains `modules/aps/README.md`, `modules/acs/WORKFLOW.
 | `modules/aps/skills/<aps-name>/` | Canonical accepted APS packages; candidate development stays scoped to its issue/branch |
 | `modules/acs/skills/<acs-name>/` | Optional accepted coding packages, only after evidence of a gap |
 | `profiles/` | Declarative profile policy and provider role mappings |
-| `providers/codex/`, `providers/claude-code/`, `providers/chatgpt/` | Thin host-specific adapters, packaging, and capability notes |
+| `providers/` | Host capability notes; split adapter code by host only when it grows |
 | `scripts/`, `tests/` | Only the implementation and meaningful checks needed by those features |
 
 Do not expose all source candidates to automatic discovery. A manifest should describe selected modules/skills and their minimal transitive dependencies. The installer must explain required additions or reject an invalid selection; it must not silently install the whole catalogue.

@@ -1,0 +1,90 @@
+{
+  "roles": [
+    "coordinator",
+    "planner-light",
+    "planner",
+    "implementer-light",
+    "implementer",
+    "implementer-complex",
+    "tester",
+    "reviewer-light",
+    "reviewer",
+    "implementer-escalated"
+  ],
+  "codex": {
+    "economy": {
+      "coordinator": "luna/high",
+      "planner-light": "luna/max",
+      "planner": "terra/medium",
+      "implementer-light": "luna/high",
+      "implementer": "luna/max",
+      "implementer-complex": "terra/medium",
+      "tester": "luna/high",
+      "reviewer-light": "luna/max",
+      "reviewer": "terra/medium",
+      "implementer-escalated": "sol/medium"
+    },
+    "balanced": {
+      "coordinator": "luna/high",
+      "planner-light": "luna/max",
+      "planner": "terra/high",
+      "implementer-light": "luna/high",
+      "implementer": "luna/max",
+      "implementer-complex": "sol/medium",
+      "tester": "luna/high",
+      "reviewer-light": "luna/max",
+      "reviewer": "sol/medium",
+      "implementer-escalated": "sol/medium"
+    },
+    "quality": {
+      "coordinator": "luna/high",
+      "planner-light": "terra/medium",
+      "planner": "sol/medium",
+      "implementer-light": "luna/max",
+      "implementer": "terra/high",
+      "implementer-complex": "sol/medium",
+      "tester": "luna/max",
+      "reviewer-light": "terra/high",
+      "reviewer": "sol/medium",
+      "implementer-escalated": "sol/medium"
+    }
+  },
+  "claude-code": {
+    "economy": {
+      "coordinator": "sonnet/low",
+      "planner-light": "sonnet/low",
+      "planner": "sonnet/medium",
+      "implementer-light": "sonnet/low",
+      "implementer": "sonnet/medium",
+      "implementer-complex": "sonnet/high",
+      "tester": "sonnet/low",
+      "reviewer-light": "sonnet/medium",
+      "reviewer": "sonnet/high",
+      "implementer-escalated": "opus/medium"
+    },
+    "balanced": {
+      "coordinator": "sonnet/low",
+      "planner-light": "sonnet/medium",
+      "planner": "sonnet/high",
+      "implementer-light": "sonnet/low",
+      "implementer": "sonnet/medium",
+      "implementer-complex": "opus/medium",
+      "tester": "sonnet/low",
+      "reviewer-light": "sonnet/medium",
+      "reviewer": "opus/medium",
+      "implementer-escalated": "opus/medium"
+    },
+    "quality": {
+      "coordinator": "sonnet/low",
+      "planner-light": "sonnet/high",
+      "planner": "opus/medium",
+      "implementer-light": "sonnet/medium",
+      "implementer": "sonnet/high",
+      "implementer-complex": "opus/medium",
+      "tester": "sonnet/medium",
+      "reviewer-light": "sonnet/high",
+      "reviewer": "opus/medium",
+      "implementer-escalated": "opus/medium"
+    }
+  }
+}

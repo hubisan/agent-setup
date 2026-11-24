@@ -1,0 +1,26 @@
+# Host verification for profile pilots
+
+Documentation checked 2026-11-24. The generated files follow the documented formats. Neither client nor a live account was available in the implementation container. Version targets below are documentation reference points, not tested minimum-version guarantees.
+
+## Codex
+
+Reference target: CLI/app based on [Codex 0.171.0](https://github.com/openai/codex/releases/tag/rust-v0.171.0), which includes GPT-6.2 Sol. See [custom agents](https://developers.openai.com/codex/subagents), [configuration reference](https://developers.openai.com/codex/config-reference), [configuration basics](https://developers.openai.com/codex/config-basic), and [model catalogue](https://developers.openai.com/api/docs/models).
+
+1. Record `codex --version`, host surface, active account/provider and advertised models/efforts. Do not record credentials. Validate the three model IDs in this client's model catalogue; API availability is not proof of Codex availability.
+2. Inspect project and user custom agent definitions, trust and configuration sources, managed requirements, selected native config profile, CLI/config arguments, inherited defaults and spawn options. Check for duplicate agent names. Current custom-agent documentation describes explicit file model/effort taking precedence over spawn/default/inherited values; older clients may differ. Resolve actual values rather than assuming precedence from this document.
+3. Use the generated files in an isolated trusted test project. The selected coordinator is separate (for example `codex -m gpt-6-luna -c model_reasoning_effort=high` if supported). Do not change managed requirements. Treat CODEX_MODEL and CODEX_MODEL_REASONING_EFFORT as possible wrapper selectors; the script conservatively rejects them when auditing, not as a claim they are official CLI settings.
+4. For each role inspect the effective configured model and effort. If the client rejects Luna max, record the actual compatibility evidence and use the capability inventory to regenerate xhigh when available. If xhigh also fails, stop. Do not edit the approved policy silently.
+5. Verify actual delegate metadata in the available subagent view or client records. Check both fields and distinguish a spawn from runtime verification. Test an override and a resumed role; if a required effective value cannot be inspected, report the gap.
+
+## Claude Code
+
+Reference target: a current CLI supporting custom agents with per-agent effort; use v2.1.318 or newer for the documented flag-triggered fallback controls (the per-spawn effort parameter requires v2.1.292+, task model/effort display v2.1.242+). See [subagents](https://code.claude.com/docs/en/sub-agents), [model configuration](https://code.claude.com/docs/en/model-config), and [settings precedence](https://code.claude.com/docs/en/settings).
+
+1. Record `claude --version`, backend and supported full model IDs/efforts. The catalogue deliberately pins claude-sonnet-5 and claude-opus-5 rather than a moving alias; propose a reviewed change if unavailable. Model selection and effort may depend on account and provider.
+2. Inspect managed, user, project, local, session settings, launch flags, environment, agent definitions (including duplicate names), mods/hooks, model restrictions, fallback chains and per-spawn parameters. The documented agent model parameter can override the file model; per-spawn effort can override file effort and CLAUDE_CODE_EFFORT_LEVEL can override both. Other sources may apply through inheritance. Avoid inherited or uninspected agent definitions; confirm configuration in /status and /config.
+3. Use an isolated target and the generated project agents. Select the coordinator independently, e.g. `claude --model claude-sonnet-5 --effort low` if available. Do not bypass managed restrictions or safety routing. Inspect and disable optional availability fallback chains for this exact-profile pilot; mandatory host routing is a limitation, not something to circumvent. Stop and report a mismatch or a refusal rather than treating it as a successful profile run.
+4. Check /tasks while each delegate is active. Record model, effort and evidence location, including overrides/resumes and any provider-initiated switch. If only alias or model but not effort is shown, do not claim full runtime verification.
+
+## Audit scope
+
+Run the CLI check with sanitized inventories and observed configuration as described in [model policy](../docs/models.md#check-target-capability-and-overrides). It tests declared resolutions and overrides and a small set of current-process environment selectors. It does not introspect another process, automatically merge arbitrary host configuration, block native spawn calls or prove that hidden or managed settings were inspected. Do not label a profile as host-verified from the static audit. Keep any unavailable host checks open in #2 or #5 as appropriate. Runtime verification and cost comparison are part of #5.
