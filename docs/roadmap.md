@@ -2,7 +2,7 @@
 
 The live execution index is [#1](https://github.com/hubisan/agent-setup/issues/1). GitHub issues own scope, acceptance criteria, dependencies, and current status. This file is the navigation map, not a second ticket tracker.
 
-Foundation complete: repository boundaries, decisions, adaptive ACS contract, profile policy, candidate catalogue, design gate, and source traceability. Installer, executable profiles, packaged skills, and runtime evidence remain open.
+Foundation complete: repository boundaries, decisions, adaptive ACS contract, profile policy, candidate catalogue, design gate, and source traceability. Profile planning, rendering and supplied-configuration audit are implemented with local tests (#2); actual target-client checks remain open. The evaluation protocol and a local configuration example exist (#4). The installer, packaged skills and live runtime evidence remain open.
 
 ## Delivery order
 
@@ -22,6 +22,6 @@ Foundation complete: repository boundaries, decisions, adaptive ACS contract, pr
 
 P0 delivers the lean coding setup before the skill catalogue expands. P1 skills are developed and accepted individually; their listing is not a bulk implementation instruction. Preparation can overlap where dependencies permit, but do not release a candidate before its own gates pass.
 
-Start with the profile issue; the small evaluation protocol is independently ready. Do not make the first ACS slice depend on completion of optional APS skills. Use the existing [workflow](../modules/acs/WORKFLOW.md) and shared APS contract.
+Complete the outstanding profile verification and review gates before using the generated files in an installed target. The evaluation protocol is available for the pilot. Do not make the first ACS slice depend on completion of optional APS skills. Use the existing [workflow](../modules/acs/WORKFLOW.md) and shared APS contract.
 
 GTD implementation, Memento features, teaching, migration of old repositories, and automatic import of upstream bundles are outside this roadmap. Remaining APS names stay in the [catalogue](../modules/aps/README.md) until a concrete need justifies an issue.

@@ -20,4 +20,4 @@ Use the active issue and its acceptance criteria as the work contract. Reuse set
 - Use a scoped branch and PR for subsequent work. Commit messages use Conventional Commits; link the owning issue. Do not rewrite shared history. Repository creation is the authorised bootstrap exception.
 - Check documentation impact with every change. State actual verification and unrun checks; configuration is not proof of runtime behaviour.
 
-No build or CI command exists yet. For foundation-only changes, inspect the diff, relative links, decision consistency, and referenced issue state. Add executable checks with the functionality they validate; do not report runtime tests for documentation.
+Run `python3 -m unittest discover -s tests -v` for the full executable check. For documentation-only changes, inspect the diff, relative links and decision consistency. When evaluating a profile or skill, use [the evaluation protocol](docs/evaluation/README.md).

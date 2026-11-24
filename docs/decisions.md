@@ -47,6 +47,10 @@ The following are agent-selected, reversible organisation choices, not additiona
 
 ## Decisions deferred until relevant evidence exists
 
-Exact provider model IDs/aliases, supported effort values, Claude role mappings, and fallback behaviour are implementation work. Do not infer them from profile names. Real savings, automatic skill activation, a replacement for `writing-for-agents`, and promotion of any optional coding skill remain unproven. Select the repository's distribution licence before the first packaged release; no licence is inferred from a public repository or from another project's licence.
+Initial provider model IDs and role mappings, including the inventory-driven Luna fallback, are now implemented as agent-selected proposals in the profile catalogue. Client-specific availability and override resolution still require verification. Do not infer them from profile names. Real savings, automatic skill activation, a replacement for `writing-for-agents`, and promotion of any optional coding skill remain unproven. Select the repository's distribution licence before the first packaged release; no licence is inferred from a public repository or from another project's licence.
 
 These decisions supersede the old mandatory skill chain, unconditional delegation, and Sol `high` escalation. They do not discard unrelated source-project requirements or turn the old APS historical audit into mandatory context.
+
+### Claude profile refinement (2026-11-24)
+
+User-approved adjustment before merging PR #13: use Sonnet for regular work in economy and balanced, including Sonnet high for balanced review and complex implementation. Reserve Opus low for approved escalation in these profiles. Quality retains Opus medium for demanding roles and recommends Sonnet medium as coordinator. Use Sonnet 5.5 and Opus 5.5, subject to target-client availability. Codex mappings are unchanged. The revised mappings are starting configurations, not measured savings or validated runtime behaviour.
