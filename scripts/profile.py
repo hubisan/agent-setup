@@ -12,8 +12,8 @@ MODELS = {
     'codex': {'luna': ('gpt-6-luna', ('high', 'xhigh', 'max')),
               'terra': ('gpt-6.1-terra', ('medium', 'high')),
               'sol': ('gpt-6.2-sol', ('low', 'medium'))},
-    'claude-code': {'sonnet': ('claude-sonnet-5', ('low', 'medium', 'high')),
-                    'opus': ('claude-opus-5', ('low', 'medium'))},
+    'claude-code': {'sonnet': ('claude-sonnet-5-5', ('low', 'medium', 'high')),
+                    'opus': ('claude-opus-5-5', ('low', 'medium'))},
 }
 # Conservative: any of these selectors requires clearing it before a clean audit.
 ENV_KEYS = {

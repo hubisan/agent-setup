@@ -27,6 +27,27 @@ class ProfilesTest(unittest.TestCase):
         self.assertEqual(plan['roles']['implementer-complex']['effort'], 'medium')
         self.assertEqual(plan['evidence'], 'configured')
 
+    def test_claude_cost_aware_profile_roles(self):
+        expected = {
+            'economy': ('low', 'sonnet/high', 'sonnet/medium', 'opus/low'),
+            'balanced': ('low', 'sonnet/high', 'sonnet/high', 'opus/low'),
+            'quality': ('medium', 'opus/medium', 'opus/medium', 'opus/medium'),
+        }
+        for profile, (coordinator, complex_role, reviewer, escalation) in expected.items():
+            with self.subTest(profile=profile):
+                roles = self.run_cli('plan', '--provider', 'claude-code', '--profile', profile)['roles']
+                self.assertEqual(roles['coordinator']['model'], 'claude-sonnet-5-5')
+                self.assertEqual(roles['coordinator']['effort'], coordinator)
+                for name, pair in [('implementer-complex', complex_role), ('reviewer', reviewer),
+                                   ('implementer-escalated', escalation)]:
+                    family, effort = pair.split('/')
+                    self.assertEqual((roles[name]['model'], roles[name]['effort']),
+                                     ('claude-' + family + '-5-5', effort))
+                if profile != 'quality':
+                    self.assertEqual([name for name, row in roles.items()
+                                      if row['model'] == 'claude-opus-5-5'], ['implementer-escalated'])
+                self.assertTrue(roles['implementer-escalated']['approval_required'])
+
     def test_all_profiles_render_native_agents(self):
         for provider in ('codex', 'claude-code'):
             for profile in ('economy', 'balanced', 'quality'):
@@ -41,8 +62,8 @@ class ProfilesTest(unittest.TestCase):
                             self.assertIn(row['effort'], ('low', 'medium'))
                         if row['model'] == 'gpt-6.1-terra':
                             self.assertIn(row['effort'], ('medium', 'high'))
-                        if row['model'] == 'claude-opus-5':
-                            self.assertEqual(row['effort'], 'medium')
+                        if row['model'] == 'claude-opus-5-5':
+                            self.assertIn(row['effort'], ('low', 'medium'))
                         if role == 'coordinator':
                             continue
                         if provider == 'codex':
@@ -91,10 +112,17 @@ class ProfilesTest(unittest.TestCase):
                 obs.write_text(json.dumps(data))
                 self.assertFalse(self.run_cli(*args)['runtime_verified'])
                 row = data['roles']['implementer-complex']
-                for model, effort in [(row['model'], 'high'), ('inherit', 'medium'), ('unknown', 'medium')]:
+                for model, effort in [(row['model'], 'low' if provider == 'claude-code' else 'high'),
+                                      ('inherit', 'medium'), ('unknown', 'medium')]:
                     data['overrides'] = [{'role': 'implementer-complex', 'model': model, 'effort': effort, 'source': 'per-spawn'}]
                     obs.write_text(json.dumps(data))
                     self.run_cli(*args, ok=False)
+                escalation = data['roles']['implementer-escalated']
+                for effort in ('high', 'xhigh', 'max'):
+                    data['overrides'] = [{'role': 'implementer-escalated', 'model': escalation['model'],
+                                          'effort': effort, 'source': 'per-spawn'}]
+                    obs.write_text(json.dumps(data))
+                    self.assertIn('Unsupported or prohibited', self.run_cli(*args, ok=False))
                 data['overrides'] = []
                 data['fallbacks'] = ['unexpected']
                 obs.write_text(json.dumps(data))

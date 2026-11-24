@@ -1,6 +1,6 @@
 # Model and profile policy
 
-The purpose is to reduce unnecessary Sol usage while retaining suitable reasoning and review. This is the policy contract. The profile CLI renders and audits requested configurations; live host compatibility and measured cost comparisons are still open.
+The purpose is to reduce unnecessary Sol and Opus usage while retaining suitable reasoning and review. This is the policy contract. The profile CLI renders and audits requested configurations; live host compatibility and measured cost comparisons are still open.
 
 ## Profiles
 
@@ -50,7 +50,7 @@ python3 scripts/profile.py render --provider claude-code --profile quality --out
 
 Omit `--profile` for balanced. A plan includes the coordinator recommendation and nine delegate roles. The coordinator remains host-selected. Render writes a **new** staging directory, including `profile-plan.json` and either `.codex/agents/acs-*.toml` or `.claude/agents/acs-*.md`. Existing output is rejected; no project files or client settings are changed. Integration and safe switching in existing targets belong to #3. No host is launched and no credentials are requested.
 
-The catalogue is the single role-to-model/effort mapping. Codex uses GPT-6 Luna, GPT-6.1 Terra and GPT-6.2 Sol. Claude Code uses pinned Sonnet 5 and Opus 5 IDs as an initial proposal (not a claim that they are the newest models or available on every account); Haiku and Fable are not selected. Explicit escalation uses Sol/Opus medium and still requires user approval. Role instructions are narrow, not an automatic chain.
+The catalogue is the single role-to-model/effort mapping. Codex uses GPT-6 Luna, GPT-6.1 Terra and GPT-6.2 Sol. Claude Code uses pinned Sonnet 5.5 and Opus 5.5 IDs. Economy and balanced use Sonnet for regular work, including Sonnet medium and high respectively for review, and Sonnet high for complex implementation. Opus low is reserved for user-approved escalation in these two profiles; quality uses Opus medium for selected demanding roles and escalation. Sonnet is capped at high and Opus at medium. Codex escalation uses Sol medium. All escalation requires user approval. Haiku and Fable are not selected. Actual account availability and comparative quality and cost remain to be validated. Role instructions are narrow, not an automatic chain.
 
 ## Check target capability and overrides
 

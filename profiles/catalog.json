@@ -59,8 +59,8 @@
       "implementer-complex": "sonnet/high",
       "tester": "sonnet/low",
       "reviewer-light": "sonnet/medium",
-      "reviewer": "sonnet/high",
-      "implementer-escalated": "opus/medium"
+      "reviewer": "sonnet/medium",
+      "implementer-escalated": "opus/low"
     },
     "balanced": {
       "coordinator": "sonnet/low",
@@ -68,14 +68,14 @@
       "planner": "sonnet/high",
       "implementer-light": "sonnet/low",
       "implementer": "sonnet/medium",
-      "implementer-complex": "opus/medium",
+      "implementer-complex": "sonnet/high",
       "tester": "sonnet/low",
       "reviewer-light": "sonnet/medium",
-      "reviewer": "opus/medium",
-      "implementer-escalated": "opus/medium"
+      "reviewer": "sonnet/high",
+      "implementer-escalated": "opus/low"
     },
     "quality": {
-      "coordinator": "sonnet/low",
+      "coordinator": "sonnet/medium",
       "planner-light": "sonnet/high",
       "planner": "opus/medium",
       "implementer-light": "sonnet/medium",
