@@ -1,6 +1,6 @@
 # Adaptive coding workflow
 
-This is the initial ACS contract. It can be used as guidance now; profile planning and agent-file generation are available, while installation and verified cross-host execution are roadmap work. A skill is optional unless the active task explicitly requires it.
+This is the ACS contract. Verified cross-host execution and measured benefits remain pilot work. A skill is optional unless the active task explicitly requires it.
 
 ## Choose the needed path
 

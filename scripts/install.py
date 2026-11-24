@@ -168,7 +168,7 @@ def load_state(root):
 
 def csv(value, default, allow_none=False):
     if value is None:
-        return list(default)
+        return sorted(default)
     if value == 'none' and allow_none:
         return []
     values = value.split(',')
@@ -221,6 +221,12 @@ def select(args, previous, manifest):
         cap = old.get('capabilities', {}).get(host) if value is None else (
             None if value == 'none' else profiles.read_json(value))
         if cap is not None:
+            require(isinstance(cap, dict) and set(cap) == {'provider', 'version', 'models'},
+                    'Capability inventory must contain only provider, version and models')
+            require(isinstance(cap['models'], dict) and all(
+                isinstance(name, str) and isinstance(efforts, list)
+                and all(isinstance(effort, str) for effort in efforts)
+                for name, efforts in cap['models'].items()), 'Invalid capability inventory model list')
             capabilities[host] = cap
     require('acs' in selected_modules or args.profile is None, 'Profile selection requires ACS')
     requested = {'modules': modules, 'providers': hosts, 'skills': skills,
@@ -237,7 +243,10 @@ def package_files(root, prefix):
     require(directory.is_dir(), f'Missing skill package: {directory}')
     files = {}
     # Never recurse through symlink directories. Inspect each entry before reading.
-    for current, dirs, names in os.walk(directory, followlinks=False):
+    def walk_error(error):
+        raise error
+
+    for current, dirs, names in os.walk(directory, followlinks=False, onerror=walk_error):
         for name in dirs:
             safe_path(root, (Path(current) / name).relative_to(root).as_posix(), directory=True)
         for name in names:
@@ -417,7 +426,12 @@ def describe(root, changes, state):
         except UnicodeDecodeError:
             row['diff'] = None
         rows.append(row)
-    report = {'target': str(root), 'selection': state['effective'] if state else None,
+    directories = sorted({parent.relative_to(root).as_posix()
+                          for path, (_, after) in changes.items() if after is not None
+                          for parent in (root / path).parents if parent != root
+                          and root in parent.parents and not parent.exists()})
+    report = {'target': str(root), 'directories_to_create': directories,
+              'selection': state['effective'] if state else None,
               'requested': state['requested'] if state else None, 'source': state['source'] if state else None,
               'changes': rows}
     # The digest binds the exact reviewed bytes/modes, target and selection.
@@ -442,7 +456,11 @@ def write_snapshot(root, path, value, expected):
             handle.flush()
             os.fsync(handle.fileno())
         require(snapshot(root, path) == expected, f'File changed while writing: {path}')
-        os.replace(temporary, target)
+        if expected is None:
+            # Unlike replace, link fails if an unowned destination appeared.
+            os.link(temporary, target)
+        else:
+            os.replace(temporary, target)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)

@@ -6,7 +6,7 @@ Use the active issue and its acceptance criteria as the work contract. Reuse set
 
 - Implementing, testing, reviewing, or delegating coding work: [ACS workflow](modules/acs/WORKFLOW.md).
 - Changing models, profiles, or delegation settings: [model policy](docs/models.md).
-- Changing module boundaries, installation, or provider integration: [architecture](docs/architecture.md).
+- Changing module boundaries, installation, or provider integration: [architecture](docs/architecture.md). To adopt or update a target: [adoption guide](docs/adoption.md).
 - Creating or changing skills or agent instructions: [design gate](docs/skill-design.md); use the [APS catalogue](modules/aps/README.md) to avoid overlapping skills.
 - Resolving scope or conflicting historical proposals: [decisions](docs/decisions.md). Inspect [sources](docs/sources.md) only for the relevant provenance.
 - Selecting the next task: [roadmap](docs/roadmap.md); issue bodies own current scope and dependencies.

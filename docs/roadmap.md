@@ -2,7 +2,7 @@
 
 The live execution index is [#1](https://github.com/hubisan/agent-setup/issues/1). GitHub issues own scope, acceptance criteria, dependencies, and current status. This file is the navigation map, not a second ticket tracker.
 
-Foundation complete: repository boundaries, decisions, adaptive ACS contract, profile policy, candidate catalogue, design gate, and source traceability. Profile planning, rendering and supplied-configuration audit are implemented with local tests (#2); actual target-client checks remain open. The evaluation protocol and a local configuration example exist (#4). The installer, packaged skills and live runtime evidence remain open.
+Foundation complete: repository boundaries, decisions, adaptive ACS contract, profile policy, candidate catalogue, design gate, and source traceability. Profile planning, rendering and supplied-configuration audit are implemented with local tests (#2); actual target-client checks remain open. The evaluation protocol and a local configuration example exist (#4). The selective installer and adoption guide are implemented in #3; independent review, host verification and the release licence gate remain open. Packaged skills and live runtime evidence remain open.
 
 ## Delivery order
 
