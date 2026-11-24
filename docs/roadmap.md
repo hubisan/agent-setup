@@ -18,10 +18,10 @@ Foundation complete: repository boundaries, decisions, adaptive ACS contract, pr
 | P1 | [#9](https://github.com/hubisan/agent-setup/issues/9) | Verified cross-agent and parallel handoff candidate | ACS pilot, ChatGPT path, evidence protocol |
 | P1 | [#10](https://github.com/hubisan/agent-setup/issues/10) | General domain modelling with conditional coding detail | ACS pilot and evidence protocol |
 | P1 | [#11](https://github.com/hubisan/agent-setup/issues/11) | Evidence-based project status review candidate | ACS pilot and evidence protocol |
-| P2 | [#12](https://github.com/hubisan/agent-setup/issues/12) | Decision on optional extra methods after observed gaps | ACS pilot and evidence protocol |
+| P2 | [#12](https://github.com/hubisan/agent-setup/issues/12) | Reassess APS/ACS catalogue; retain, simplify, replace, defer or drop methods | ACS pilot and evidence protocol |
 
 P0 delivers the lean coding setup before the skill catalogue expands. P1 skills are developed and accepted individually; their listing is not a bulk implementation instruction. Preparation can overlap where dependencies permit, but do not release a candidate before its own gates pass.
 
 Complete the outstanding profile verification and review gates before using the generated files in an installed target. The evaluation protocol is available for the pilot. Do not make the first ACS slice depend on completion of optional APS skills. Use the existing [workflow](../modules/acs/WORKFLOW.md) and shared APS contract.
 
-GTD implementation, Memento features, teaching, migration of old repositories, and automatic import of upstream bundles are outside this roadmap. Remaining APS names stay in the [catalogue](../modules/aps/README.md) until a concrete need justifies an issue.
+GTD implementation, Memento features, teaching, migration of old repositories, and automatic import of upstream bundles are outside this roadmap. Remaining APS names stay in the [catalogue](../modules/aps/README.md) until a concrete need justifies an issue. #12 records a catalogue-wide reassessment after the pilot; individual candidate gates apply before implementation and do not depend on completing #12.

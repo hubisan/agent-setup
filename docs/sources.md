@@ -14,6 +14,7 @@ Checked 2026-11-24. The owner's consolidated decisions in [decisions.md](decisio
 | [APS handoff #20](https://github.com/hubisan/agent-project-setup/issues/20), [PR #22](https://github.com/hubisan/agent-project-setup/pull/22) | PR remains open and draft. Label correction to `handoff`, cross-agent pilot, and parallel handoff evidence remain work. |
 | [APS documentation #24](https://github.com/hubisan/agent-project-setup/issues/24) | Candidate for human and agent documentation; includes comparison with `writing-for-agents`, project-layout preservation, and real pilot gates. |
 | [APS review #19](https://github.com/hubisan/agent-project-setup/issues/19) | Source for actual progress, blockers, and next actions; retained as `aps-project-review` candidate here. |
+| [APS adoption #12](https://github.com/hubisan/agent-project-setup/issues/12) | Adoption requirements continue in [installer #3](https://github.com/hubisan/agent-setup/issues/3) and an on-demand guide. The owner rejected an `aps-adopt` skill; no source package import or change to the historical issue. |
 | [APS questionnaire #25](https://github.com/hubisan/agent-project-setup/issues/25) | Separate stakeholder-questionnaire candidate; not conflated with live clarification. |
 | [APS outcomes #8](https://github.com/hubisan/agent-project-setup/issues/8), [#9](https://github.com/hubisan/agent-project-setup/issues/9), [#10](https://github.com/hubisan/agent-project-setup/issues/10) | Historical Memento/GTD traceability only. Do not create corresponding APS/GTD implementation tickets here. |
 
