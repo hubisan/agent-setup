@@ -267,7 +267,6 @@ def desired_files(requested, effective, accepted):
         blocks['AGENTS.md'] += (b'\nFor coding work, read [.agent-setup/WORKFLOW.md](.agent-setup/WORKFLOW.md) '
                                 b'and follow its adaptive scope and review rules.\n')
         workflow = (ROOT / 'modules/acs/WORKFLOW.md').read_text()
-        workflow = workflow.replace('../../docs/models.md#profile-commands', 'models.md')
         workflow = workflow.replace('../../docs/models.md', 'models.md')
         policy = (ROOT / 'docs/models.md').read_text().split('\n## Profile commands\n')[0]
         policy = policy.replace('[the catalogue](../profiles/catalog.json)', 'the generated profile plans')

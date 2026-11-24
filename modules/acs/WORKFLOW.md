@@ -16,7 +16,7 @@ Examples: a spelling fix is simple; a bounded feature is normally normal; a one-
 
 ## Execute within the scope
 
-The coordinator owns the active contract and integration. Use the matching `acs-*` named delegate from the selected profile when available; check the [profile commands and host verification](../../docs/models.md#profile-commands) before first delegation. Delegate only for the benefits in the [model policy](../../docs/models.md). Independent review uses a reviewer who did not implement the change; independence does not require a more expensive model. Parallelise disjoint work; coordinate shared files explicitly.
+The coordinator owns the active contract and integration. Use the matching `acs-*` named delegate from the selected profile when available. Read the [model policy](../../docs/models.md) before first delegation, verify the effective host configuration, and delegate only for the benefits defined there. Independent review uses a reviewer who did not implement the change; independence does not require a more expensive model. Parallelise disjoint work; coordinate shared files explicitly.
 
 Use the narrowest meaningful checks for changed behaviour and risks. TDD is useful for suitable logic changes and regression reproduction; it is not a mandatory skill or ceremony. Run broader checks for an affected integration risk or a required repository gate. Do not repeat successful testing without a concrete reason. State unavailable checks as unrun.
 
