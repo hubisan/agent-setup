@@ -81,7 +81,8 @@ runpy.run_path(script, run_name='__main__')
     def fixture_source(self):
         # Only a private temporary test source; the real accepted registry remains empty.
         self.source = self.base / 'source'
-        for rel in ('scripts/install.py', 'scripts/profile.py', 'core/manifest.json', 'core/APS.md',
+        for rel in ('scripts/install.py', 'scripts/profile.py', 'scripts/hook_config.py',
+                    'scripts/hook_runtime.py', 'core/manifest.json', 'core/APS.md',
                     'modules/acs/WORKFLOW.md', 'docs/models.md', 'profiles/catalog.json'):
             dst = self.source / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
@@ -375,6 +376,95 @@ runpy.run_path(script, run_name='__main__')
         self.install('--profile', 'quality')
         self.install('--remove')
         self.assertEqual(self.tree(), {})
+
+
+    def init_git(self):
+        subprocess.run(['git', 'init', '-q', str(self.target)], check=True)
+
+    def test_optional_hooks_preserve_unrelated_settings_and_permissions(self):
+        self.init_git()
+        codex = {'description': 'local', 'hooks': {'SessionStart': [
+            {'matcher': 'startup', 'hooks': [{'type': 'command', 'command': 'true'}]}]}}
+        claude = {'permissions': {'deny': ['Bash(rm:*)']}, 'hooks': {'PreToolUse': [
+            {'matcher': 'Bash', 'hooks': [{'type': 'command', 'command': 'true'}]}]}}
+        self.put('.codex/hooks.json', json.dumps(codex).encode(), 0o640)
+        self.put('.claude/settings.json', json.dumps(claude).encode(), 0o600)
+        self.install('--modules', 'acs', '--guard-providers', 'codex',
+                     '--telemetry-providers', 'claude-code')
+        a = json.loads(self.read('.codex/hooks.json'))
+        b = json.loads(self.read('.claude/settings.json'))
+        self.assertEqual(a['hooks']['SessionStart'][0], codex['hooks']['SessionStart'][0])
+        self.assertNotIn('SessionEnd', a['hooks'])
+        self.assertIn('SessionEnd', b['hooks'])
+        self.assertEqual(b['permissions'], claude['permissions'])
+        self.assertEqual(stat.S_IMODE((self.target / '.claude/settings.json').stat().st_mode), 0o600)
+        self.assertTrue((self.target / '.agents/hooks/runtime.py').is_file())
+        self.assertEqual(self.cli('preview')['changes'], [])
+        # User changes settings outside managed groups.
+        b['env'] = {'LOCAL_SETTING': 'retained'}
+        self.put('.claude/settings.json', json.dumps(b).encode(), 0o600)
+        self.install('--guard-providers', 'claude-code', '--telemetry-providers', 'claude-code')
+        self.assertEqual(json.loads(self.read('.codex/hooks.json')), codex)
+        b = json.loads(self.read('.claude/settings.json'))
+        self.assertEqual(len(b['hooks']['PreToolUse']), 2)
+        self.assertTrue(b['hooks']['PreToolUse'][1]['hooks'][0]['command'].endswith(' both'))
+        self.install('--guard-providers', 'none', '--telemetry-providers', 'none')
+        claude['env'] = {'LOCAL_SETTING': 'retained'}
+        self.assertEqual(json.loads(self.read('.claude/settings.json')), claude)
+        self.assertEqual(json.loads(self.read('.codex/hooks.json')), codex)
+        self.assertFalse((self.target / '.agents/hooks/runtime.py').exists())
+
+    def test_hook_registration_conflicts_and_stale_preview(self):
+        self.init_git()
+        options = ('--modules', 'acs', '--guard-providers', 'codex,claude-code')
+        config = self.put('.codex/config.toml', b'[[hooks.SessionStart]]\nmatcher = "startup"\n')
+        self.assertIn('Existing inline Codex hooks', self.cli('preview', *options, ok=False))
+        config.unlink()
+        settings = self.put('.claude/settings.json', b'{"hooks":[]}')
+        self.assertIn('Unsupported hooks', self.cli('preview', *options, ok=False))
+        self.put('.claude/settings.json', b'{"hooks":{},"hooks":{}}')
+        self.assertIn('Duplicate key', self.cli('preview', *options, ok=False))
+        self.put('.claude/settings.json', b'{"permissions":{"deny":["Bash"]}}')
+        plan = self.cli('preview', *options)
+        self.put('.claude/settings.json', b'{"permissions":{"deny":["Write"]}}')
+        self.assertIn('preview stale', self.cli('apply', *options, '--approve', plan['approval'], ok=False))
+        self.install(*options)
+        doc = json.loads(self.read('.claude/settings.json'))
+        doc['hooks']['SessionStart'].append(doc['hooks']['SessionStart'][0])
+        self.put('.claude/settings.json', json.dumps(doc).encode())
+        before = self.tree()
+        self.assertIn('duplicate managed hook', self.cli('preview', '--remove', ok=False))
+        self.assertEqual(self.tree(), before)
+
+    def test_hook_recovery_restores_existing_config_and_removes_new_files(self):
+        self.init_git()
+        self.put('.claude/settings.json', b'{"permissions":{"deny":["Bash"]}}\n', 0o600)
+        before = self.tree()
+        options = ('--modules', 'acs', '--guard-providers', 'codex,claude-code',
+                   '--telemetry-providers', 'claude-code')
+        plan = self.cli('preview', *options)
+        self.assertIn('simulated interruption', self.cli('apply', *options,
+                      '--approve', plan['approval'], fail_at=STATE, ok=False))
+        self.assertTrue((self.target / '.claude/settings.json').exists())
+        self.cli('recover')
+        self.assertEqual(self.tree(), before)
+        self.install(*options)
+        self.install('--remove')
+        self.assertFalse((self.target / '.codex/hooks.json').exists())
+        self.assertEqual(json.loads(self.read('.claude/settings.json')), {'permissions': {'deny': ['Bash']}})
+
+    def test_nested_git_and_claude_script_resolution(self):
+        self.init_git()
+        self.install('--modules', 'acs', '--guard-providers', 'codex,claude-code')
+        nested = self.target / 'src/deep'
+        nested.mkdir(parents=True)
+        for path, provider in [('.codex/hooks.json', 'codex'), ('.claude/settings.json', 'claude-code')]:
+            command = json.loads(self.read(path))['hooks']['SessionStart'][0]['hooks'][0]['command']
+            result = subprocess.run(command, shell=True, cwd=nested, capture_output=True, text=True,
+                                    input=json.dumps({'hook_event_name': 'SessionStart'}),
+                                    env={**os.environ, 'CLAUDE_PROJECT_DIR': str(self.target)}, timeout=3)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('systemMessage', json.loads(result.stdout))
 
 
 if __name__ == '__main__':

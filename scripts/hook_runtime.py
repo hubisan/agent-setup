@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import re
 import stat
 import sys
 import time
@@ -67,13 +68,17 @@ def observation(provider, payload, policy):
     return event, role, model, effort, evidence
 
 
-def check(policy, role, model, effort):
+def check(policy, role, model, effort, event=None):
     """Return a bounded reason code; unknown values never authorise or deny."""
     allowed = policy['allowed']
     expected = policy['plan']['roles'].get(role)
     if isinstance(model, str) and model in ASTRA:
         return 'violation', 'astra-prohibited'
     known_model = isinstance(model, str) and model in allowed
+    # Claude documents to_model as a canonical ID, unlike unresolved Agent aliases.
+    if (event == 'PreModelSwitch' and isinstance(model, str)
+            and re.fullmatch(r'claude-[a-z0-9-]+', model) and not known_model):
+        return 'violation', 'model-outside-policy'
     known_effort = isinstance(effort, str) and effort in EFFORTS
     if known_model and known_effort and effort not in allowed[model]:
         return 'violation', 'effort-prohibited'
@@ -106,9 +111,13 @@ def usage(payload, event):
     return result or None
 
 
+def safe_version(value):
+    return value if isinstance(value, str) and re.fullmatch(r'v?\d+(?:\.\d+){1,3}|fixture', value) else None
+
+
 def event_record(provider, payload, policy, obs, guard_enabled, started):
     event, role, model, effort, evidence = obs
-    verdict, reason = check(policy, role, model, effort)
+    verdict, reason = check(policy, role, model, effort, event)
     known_models = set(policy['allowed']) | set(ASTRA) | {'sonnet', 'opus', 'inherit'}
     source = payload.get('source')
     sources = ('startup', 'resume', 'clear', 'compact', 'fork', 'command', 'picker',
@@ -118,7 +127,7 @@ def event_record(provider, payload, policy, obs, guard_enabled, started):
     return {
         'schema': 1, 'time_utc': datetime.now(timezone.utc).isoformat(),
         'provider': provider, 'client_version': None,
-        'configured_capability_version': policy['plan']['capability_version'],
+        'configured_capability_version': safe_version(policy['plan']['capability_version']),
         'event': event, 'source': source if source in sources else None,
         'session_id': identifier(payload.get('session_id')),
         'agent_id': identifier(payload.get('agent_id')),
@@ -163,7 +172,7 @@ def append_event(project, record):
         import fcntl
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         data = (json.dumps(record, separators=(',', ':')) + '\n').encode()
-        if info.st_size + len(data) > MAX_DAY:
+        if os.fstat(fd).st_size + len(data) > MAX_DAY:
             raise OSError('Telemetry daily limit reached')
         if os.write(fd, data) != len(data):
             raise OSError('Incomplete telemetry write')
@@ -173,7 +182,7 @@ def append_event(project, record):
 
 def response(obs, policy):
     event, role, model, effort, evidence = obs
-    verdict, reason = check(policy, role, model, effort)
+    verdict, reason = check(policy, role, model, effort, event)
     if verdict == 'violation' and event in BLOCKING:
         return {'hookSpecificOutput': {'hookEventName': event,
                                       'permissionDecision': 'deny',

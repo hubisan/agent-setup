@@ -1,4 +1,3 @@
-import importlib.util
 import json
 from pathlib import Path
 import os
@@ -106,6 +105,43 @@ class HookTests(unittest.TestCase):
     def test_unknown_payload_does_not_block_or_record_raw_data(self):
         self.assertEqual(self.call('codex', 'both', 'NewEvent', raw='SECRET'), {})
         self.assertEqual(self.events(), [])
+
+
+    def test_canonical_claude_switch_denies_unlisted_model_but_not_unknown(self):
+        out = self.call('claude-code', 'both', 'PreModelSwitch', to_model='claude-opus-4-6')
+        self.assertEqual(out['hookSpecificOutput']['permissionDecision'], 'deny')
+        out = self.call('claude-code', 'guard', 'PreModelSwitch', to_model=None)
+        self.assertNotIn('hookSpecificOutput', out)
+        self.assertEqual(self.events()[0]['policy_result'], 'violation')
+
+    def test_terra_sonnet_caps_and_escalation_evidence(self):
+        for provider, model, effort, tool in [
+                ('codex', 'gpt-6.1-terra', 'xhigh', 'spawn_agent'),
+                ('claude-code', 'claude-sonnet-5-5', 'max', 'Agent')]:
+            effort_field = 'reasoning_effort' if provider == 'codex' else 'effort'
+            out = self.call(provider, 'guard', 'PreToolUse', tool_name=tool,
+                            tool_input={'model': model, effort_field: effort})
+            self.assertEqual(out['hookSpecificOutput']['permissionDecision'], 'deny')
+        out = self.call('claude-code', 'both', 'PreToolUse', tool_name='Agent',
+                        tool_input={'subagent_type': 'acs-implementer-escalated',
+                                    'model': 'claude-opus-5-5', 'effort': 'low'})
+        self.assertNotIn('hookSpecificOutput', out)
+        self.assertEqual(self.events()[0]['policy_reason'], 'escalation-approval-unobserved')
+
+    def test_internal_deadline_is_non_denial(self):
+        proc = subprocess.Popen([sys.executable, str(self.runtime), 'claude-code', 'guard'],
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            self.assertEqual(proc.wait(timeout=3), 1)
+            self.assertEqual(proc.stdout.read(), b'')
+            self.assertIn(b'evidence unavailable', proc.stderr.read())
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait()
+            proc.stdin.close()
+            proc.stdout.close()
+            proc.stderr.close()
 
 
 if __name__ == '__main__':

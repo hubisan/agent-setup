@@ -15,6 +15,9 @@ import stat
 import subprocess
 import sys
 import tempfile
+import tomllib
+
+import hook_config
 
 import profile as profiles
 
@@ -51,7 +54,9 @@ def relative(path):
 
 def owned_path(path):
     parts = relative(path)
-    permitted = (path in INSTRUCTIONS or path == STATE
+    permitted = (path in INSTRUCTIONS or path == STATE or path in hook_config.PATHS.values()
+                 or path in ('.agents/hooks/runtime.py', '.agents/hooks/policy-codex.json',
+                             '.agents/hooks/policy-claude-code.json')
                  or path in ('.agents/WORKFLOW.md', '.agents/models.md',
                              '.agents/setup/profile-codex.json', '.agents/setup/profile-claude-code.json')
                  or re.fullmatch(r'\.codex/agents/acs-[a-z0-9-]+\.toml', path)
@@ -153,9 +158,12 @@ def load_state(root):
     require(state['schema'] == 1 and isinstance(state['files'], dict), 'Unsupported installation state')
     for path, row in state['files'].items():
         owned_path(path)
-        require(path != STATE and row['kind'] in ('file', 'block'), f'Invalid ownership: {path}')
+        require(path != STATE and row['kind'] in ('file', 'block', 'hooks'), f'Invalid ownership: {path}')
         require((row['kind'] == 'block') == (path in INSTRUCTIONS), f'Invalid instruction ownership: {path}')
-        if row['kind'] == 'file':
+        require((row['kind'] == 'hooks') == (path in hook_config.PATHS.values()), f'Invalid hook ownership: {path}')
+        if row['kind'] == 'hooks':
+            hook_config.validate_record(path, row)
+        elif row['kind'] == 'file':
             require(re.fullmatch(r'[0-9a-f]{64}', row['sha256'])
                     and type(row['mode']) is int and 0 <= row['mode'] <= 0o777, f'Invalid file record: {path}')
         else:
@@ -229,10 +237,20 @@ def select(args, previous, manifest):
                 for name, efforts in cap['models'].items()), 'Invalid capability inventory model list')
             capabilities[host] = cap
     require('acs' in selected_modules or args.profile is None, 'Profile selection requires ACS')
+    hook_selection = {}
+    for key, value in [('guard_providers', args.guard_providers),
+                       ('telemetry_providers', args.telemetry_providers)]:
+        retained = set(old.get(key, [])) & set(hosts) if 'acs' in selected_modules else set()
+        chosen = csv(value, retained, allow_none=True)
+        require(set(chosen) <= set(hosts) and (not chosen or 'acs' in selected_modules),
+                f'{key} requires selected ACS hosts')
+        hook_selection[key] = chosen
     requested = {'modules': modules, 'providers': hosts, 'skills': skills,
+                 **hook_selection,
                  'profile': profile if 'acs' in selected_modules else None,
                  'capabilities': capabilities}
     effective = {'modules': selected_modules, 'providers': hosts, 'skills': selected_skills,
+                 **hook_selection,
                  'added_modules': sorted(set(selected_modules) - set(modules)),
                  'added_skills': sorted(set(selected_skills) - set(skills))}
     return requested, effective, accepted
@@ -270,6 +288,7 @@ def desired_files(requested, effective, accepted):
         workflow = workflow.replace('../../docs/models.md', 'models.md')
         policy = (ROOT / 'docs/models.md').read_text().split('\n## Profile commands\n')[0]
         policy = policy.replace('[the catalogue](../profiles/catalog.json)', 'the generated profile plans')
+        policy = policy.replace('[hooks](hooks.md)', 'hooks')
         files['.agents/WORKFLOW.md'] = Snapshot(workflow.encode())
         files['.agents/models.md'] = Snapshot((policy + '\n').encode())
         for host in effective['providers']:
@@ -277,6 +296,10 @@ def desired_files(requested, effective, accepted):
             files[f'.agents/setup/profile-{host}.json'] = Snapshot(json_bytes(result))
             for path, content in profiles.native_files(result):
                 files[owned_path(path)] = Snapshot(content.encode())
+            if host in requested['guard_providers'] or host in requested['telemetry_providers']:
+                files[f'.agents/hooks/policy-{host}.json'] = Snapshot(json_bytes(hook_config.policy_for(result)))
+        if requested['guard_providers'] or requested['telemetry_providers']:
+            files['.agents/hooks/runtime.py'] = Snapshot((ROOT / 'scripts/hook_runtime.py').read_bytes())
     skill_roots = []
     for name in effective['skills']:
         prefix = f'modules/{accepted[name]["module"]}/skills/{name}'
@@ -340,15 +363,17 @@ def check_owned(root, files):
         current = snapshot(root, path)
         if row['kind'] == 'block':
             block_base(path, current, row)
+        elif row['kind'] == 'hooks':
+            hook_config.merge_settings(path, current.data if current else None, row, row['groups'])
         else:
             require(fingerprint(current) == {'sha256': row['sha256'], 'mode': row['mode']},
                     f'Edited or missing managed file: {path}; restore its recorded version before proceeding')
 
 
-def source_version(manifest, files, blocks):
+def source_version(manifest, files, blocks, registrations):
     # Content identity also covers a source archive or uncommitted source changes.
     identity = {'manifest': manifest, 'files': {p: fingerprint(v) for p, v in files.items()},
-                'blocks': {p: digest(v) for p, v in blocks.items()}}
+                'blocks': {p: digest(v) for p, v in blocks.items()}, 'registrations': registrations}
     try:
         result = subprocess.run(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'],
                                 capture_output=True, text=True, timeout=5, check=True)
@@ -358,14 +383,42 @@ def source_version(manifest, files, blocks):
     return {'git_commit': revision, 'content_sha256': digest(json_bytes(identity))}
 
 
+def hook_registrations(root, requested):
+    registrations = {}
+    for host in requested['providers']:
+        groups = hook_config.registrations(host, host in requested['guard_providers'],
+                                          host in requested['telemetry_providers'])
+        if not groups:
+            continue
+        if host == 'codex':
+            # Do not mix native config formats or guess the script root.
+            result = subprocess.run(['git', '-C', str(root), 'rev-parse', '--show-toplevel'],
+                                    capture_output=True, text=True, timeout=5)
+            require(result.returncode == 0 and Path(result.stdout.strip()).resolve() == root,
+                    'Codex hooks require the target to be a Git worktree root')
+            current = snapshot(root, '.codex/config.toml')
+            if current:
+                require('hooks' not in tomllib.loads(current.data.decode()),
+                        'Existing inline Codex hooks; reconcile config.toml manually before enabling')
+        else:
+            local = snapshot(root, '.claude/settings.local.json')
+            if local:
+                document = hook_config.settings_document(local.data)
+                require(not hook_config.references_runtime(document.get('hooks', {})),
+                        'Existing Agent Setup hook in Claude local settings; reconcile manually')
+        registrations[hook_config.PATHS[host]] = groups
+    return registrations
+
+
 def make_plan(root, args, state):
     old = state['files'] if state else {}
     check_owned(root, old)
     if args.remove:
         require(not any((args.modules, args.providers, args.skills, args.profile,
-                         args.codex_capabilities, args.claude_capabilities)),
+                         args.codex_capabilities, args.claude_capabilities,
+                         args.guard_providers, args.telemetry_providers)),
                 '--remove cannot be combined with selection options')
-        files, blocks, requested, effective, source, skill_roots = {}, {}, None, None, None, []
+        files, blocks, requested, effective, source, skill_roots, registrations = {}, {}, None, None, None, [], {}
     else:
         manifest = read_json(ROOT, 'core/manifest.json')
         require(manifest['schema'] == 1, 'Unsupported source manifest')
@@ -374,7 +427,8 @@ def make_plan(root, args, state):
             require(snapshot(root, 'AGENTS.override.md') is None,
                     'AGENTS.override.md would shadow AGENTS.md; reconcile instructions manually')
         files, blocks, skill_roots = desired_files(requested, effective, accepted)
-        source = source_version(manifest, files, blocks)
+        registrations = hook_registrations(root, requested)
+        source = source_version(manifest, files, blocks, registrations)
     # A package must not merge with an unrelated or locally extended skill directory.
     # Check both the previous and the requested selection, including removal.
     for path in old:
@@ -389,12 +443,16 @@ def make_plan(root, args, state):
                 require(f'{directory}/{rel}' in old,
                         f'Unowned content in skill directory: {directory}/{rel}; move it or choose another skill')
     changes, ownership = {}, {}
-    for path in sorted(set(old) | set(files) | set(blocks)):
+    for path in sorted(set(old) | set(files) | set(blocks) | set(registrations)):
         owned_path(path)
         current = snapshot(root, path)
         record = old.get(path)
         if path in INSTRUCTIONS:
             after, row = plan_block(path, current, record, blocks.get(path))
+        elif path in hook_config.PATHS.values():
+            data, row = hook_config.merge_settings(path, current.data if current else None,
+                                                   record, registrations.get(path, {}))
+            after = Snapshot(data, current.mode if current else 0o644) if data is not None else None
         else:
             after = files.get(path)
             require(record is not None or current is None,
@@ -505,6 +563,8 @@ def main():
     parser.add_argument('--providers', help='Comma-separated codex,claude-code; default both')
     parser.add_argument('--skills', help='Comma-separated accepted skills, or none')
     parser.add_argument('--profile', choices=['economy', 'balanced', 'quality'])
+    parser.add_argument('--guard-providers', help='Selected ACS hosts for model guard, or none; default none')
+    parser.add_argument('--telemetry-providers', help='Selected ACS hosts for local telemetry, or none; default none')
     parser.add_argument('--codex-capabilities', help='Inventory JSON path or none')
     parser.add_argument('--claude-capabilities', help='Inventory JSON path or none')
     parser.add_argument('--remove', action='store_true', help='Remove only managed content')
@@ -515,7 +575,8 @@ def main():
         require(args.command == 'apply' or args.approve is None, '--approve is only for apply')
         if args.command in ('status', 'recover'):
             require(not any((args.remove, args.modules, args.providers, args.skills, args.profile,
-                             args.codex_capabilities, args.claude_capabilities)), 'Selection options require preview/apply')
+                             args.codex_capabilities, args.claude_capabilities,
+                             args.guard_providers, args.telemetry_providers)), 'Selection options require preview/apply')
         with target_lock(root):
             # Earlier unmerged drafts used a different state directory. Never
             # interpret one as a fresh target or abandon its recovery journal.
@@ -541,7 +602,7 @@ def main():
                         apply(root, changes)
                         report['applied'] = True
         print(json.dumps(report, indent=2))
-    except (ValueError, KeyError, TypeError, AttributeError, OSError) as error:
+    except (ValueError, KeyError, TypeError, AttributeError, OSError, subprocess.SubprocessError) as error:
         print(f'Installation error: {error}', file=sys.stderr)
         return 2
     return 0
