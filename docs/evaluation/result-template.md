@@ -18,6 +18,8 @@ Controlled variables and deviations:
 | Negative trigger, fresh context | | | |
 | Acceptance criteria passed / failed / unrun | | | |
 | Material omissions / interruptions | | | |
+| Required steps / unnecessary detours / scope drift | | | |
+| Stopping condition / user redirects | | | |
 | Independent findings / rework / completion | | | |
 
 Use not applicable or unknown with a reason, not a blank value treated as pass. List exact checks and artifact references.

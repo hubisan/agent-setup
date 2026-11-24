@@ -1,6 +1,6 @@
 # APS scope and candidate catalogue
 
-APS supplies reusable project methods for software and non-software work. These names define method boundaries, not installed or accepted skills. Recurring use and incremental value are prerequisites for packaging; the [design gate](../../docs/skill-design.md) applies to every candidate. The first delivery prioritises ACS workflow and profiles; accept APS candidates individually through the [design gate](../../docs/skill-design.md).
+APS supplies reusable project methods for software and non-software work. These names define method boundaries, not installed or accepted skills. Recurring use and incremental value, including process discipline, are prerequisites for packaging. The first delivery prioritises ACS workflow and profiles; accept each candidate through the [design gate](../../docs/skill-design.md).
 
 ## Initial candidates
 
@@ -31,7 +31,7 @@ Reserved methods are not an instruction to create all these skills. Start one on
 
 ## Initial packaging assessment
 
-These are provisional design hypotheses, not measured usage or acceptance decisions. Revisit each in its actual use case before building a package.
+These are provisional design hypotheses, not measured usage or acceptance decisions. Revisit each in its actual use case before building a package. [#12](https://github.com/hubisan/agent-setup/issues/12) tracks catalogue-wide reassessment: keep, simplify, replace with a lighter form, defer, or drop. Apply the gate to each candidate before implementation; do not wait for the full catalogue review.
 
 | Methods | First form to evaluate |
 | --- | --- |
