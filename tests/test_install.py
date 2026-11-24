@@ -464,7 +464,8 @@ runpy.run_path(script, run_name='__main__')
                                     input=json.dumps({'hook_event_name': 'SessionStart'}),
                                     env={**os.environ, 'CLAUDE_PROJECT_DIR': str(self.target)}, timeout=3)
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn('systemMessage', json.loads(result.stdout))
+            self.assertEqual(result.stdout, '')
+            self.assertEqual(result.stderr, '')
 
 
     def test_hook_script_resolves_in_linked_worktree_with_spaces(self):
@@ -485,7 +486,8 @@ runpy.run_path(script, run_name='__main__')
                                     input='{"hook_event_name":"SessionStart"}',
                                     env={**os.environ, 'CLAUDE_PROJECT_DIR': str(self.target)}, timeout=3)
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn('systemMessage', json.loads(result.stdout))
+            self.assertEqual(result.stdout, '')
+            self.assertEqual(result.stderr, '')
 
 
 if __name__ == '__main__':

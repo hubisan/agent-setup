@@ -187,11 +187,12 @@ def response(obs, policy):
         return {'hookSpecificOutput': {'hookEventName': event,
                                       'permissionDecision': 'deny',
                                       'permissionDecisionReason': 'Agent Setup: ' + reason}}
-    if event == 'PreModelRequest' and verdict != 'violation':
-        # Diagnostic-only hook: don't repeat an unknown-effort message on every attempt.
-        return {}
-    if verdict != 'within-observed-policy':
-        return {'systemMessage': 'Agent Setup: ' + reason + '; effective routing not verified.'}
+    # Routine unknowns are evidence gaps, not warnings on every invocation.
+    # Keep a warning only for a confirmed violation or explicit paid escalation.
+    if verdict == 'violation':
+        return {'systemMessage': 'Agent Setup: ' + reason}
+    if reason == 'escalation-approval-unobserved' and event == 'PreToolUse':
+        return {'systemMessage': 'Agent Setup: confirm escalation approval.'}
     return {}
 
 
@@ -232,7 +233,9 @@ def main():
                     print('Agent Setup: telemetry unavailable', file=sys.stderr)
         else:
             print('Agent Setup: event not understood', file=sys.stderr)
-        print(json.dumps(result))
+        # Both hosts accept exit 0 without output. Never emit a routine context payload.
+        if result:
+            print(json.dumps(result, separators=(',', ':')))
         return 0
     except (OSError, ValueError, TypeError, KeyError, AttributeError):
         print('Agent Setup: hook evidence unavailable', file=sys.stderr)

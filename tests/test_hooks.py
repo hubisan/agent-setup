@@ -35,7 +35,7 @@ class HookTests(unittest.TestCase):
                                 input=json.dumps(payload), capture_output=True, text=True,
                                 env={**os.environ, 'HOME': str(self.home)}, timeout=3)
         self.assertEqual(result.returncode, 0, result.stderr)
-        return json.loads(result.stdout)
+        return json.loads(result.stdout) if result.stdout else {}
 
     def events(self):
         paths = list(self.home.glob('.local/state/agent-setup-hooks/*/*.jsonl'))
@@ -159,6 +159,27 @@ class HookTests(unittest.TestCase):
                         tool_input={'model': 'gpt-6.2-sol', 'reasoning_effort': 'max'})
         self.assertEqual(out['hookSpecificOutput']['permissionDecision'], 'deny')
         self.assertEqual(list(outside.iterdir()), [])
+
+
+    def test_normal_and_routine_unknown_events_have_zero_output(self):
+        for provider, tool, model, effort_key, effort in (
+                ('codex', 'spawn_agent', 'gpt-6-luna', 'reasoning_effort', 'max'),
+                ('claude-code', 'Agent', 'claude-sonnet-5-5', 'effort', 'medium')):
+            for mode in ('guard', 'telemetry', 'both'):
+                for event, fields in (
+                        ('SessionStart', {'model': model}),
+                        ('PreToolUse', {'tool_name': tool,
+                                        'tool_input': {'model': model, effort_key: effort}}),
+                        ('PreToolUse', {'tool_name': tool, 'tool_input': {}})):
+                    with self.subTest(provider=provider, mode=mode, event=event, fields=fields):
+                        result = subprocess.run(
+                            [sys.executable, str(self.runtime), provider, mode],
+                            input=json.dumps({'hook_event_name': event, **fields}),
+                            capture_output=True,
+                            env={**os.environ, 'HOME': str(self.home)}, timeout=3)
+                        self.assertEqual(result.returncode, 0)
+                        self.assertEqual(result.stdout, b'')
+                        self.assertEqual(result.stderr, b'')
 
 
 if __name__ == '__main__':
