@@ -25,7 +25,7 @@ def registrations(provider, guard, telemetry):
         # A PreModelSwitch timeout can cancel a switch. Do not add that
         # boundary solely for observation; PostModelSwitch records changes.
         telemetry_events |= {'PostModelSwitch', 'ConfigChange'}
-        command = 'exec python3 "$CLAUDE_PROJECT_DIR/.agents/hooks/runtime.py"'
+        command = 'test -n "$CLAUDE_PROJECT_DIR" || exit 1; exec python3 "$CLAUDE_PROJECT_DIR/.agents/hooks/runtime.py"'
         matcher = '^Agent$'
     result = {}
     for event in sorted((guard_events if guard else set()) | (telemetry_events if telemetry else set())):

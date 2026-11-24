@@ -73,11 +73,11 @@ class HookTests(unittest.TestCase):
         self.assertNotIn('hookSpecificOutput', out)
         self.call('codex', 'telemetry', 'PostModelRequest', model='gpt-6.2-sol',
                   status='failed', error='SECRET_ERROR', token_usage={'input_tokens': 0,
-                  'cached_input_tokens': 2, 'output_tokens': False, 'secret': 'SECRET_USAGE'})
+                  'cached_input_tokens': 2, 'cache_write_input_tokens': 3, 'output_tokens': False, 'secret': 'SECRET_USAGE'})
         rows = self.events()
         self.assertEqual(len(rows), 2)
         self.assertIsNone(rows[0]['usage'])
-        self.assertEqual(rows[1]['usage'], {'input_tokens': 0, 'cached_input_tokens': 2})
+        self.assertEqual(rows[1]['usage'], {'input_tokens': 0, 'cached_input_tokens': 2, 'cache_write_input_tokens': 3})
         self.assertEqual(rows[1]['status'], 'failed')
         self.assertFalse(rows[1]['runtime_verified'])
         self.assertNotIn('SECRET', json.dumps(rows))
@@ -142,6 +142,23 @@ class HookTests(unittest.TestCase):
             proc.stdin.close()
             proc.stdout.close()
             proc.stderr.close()
+
+
+    def test_private_storage_and_symlink_conflict_does_not_erase_denial(self):
+        self.call('codex', 'telemetry', 'SessionStart', model='gpt-6-luna')
+        base = self.home / '.local/state/agent-setup-hooks'
+        log = next(base.glob('*/*.jsonl'))
+        self.assertEqual(log.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(log.parent.stat().st_mode & 0o777, 0o700)
+        self.assertEqual(base.stat().st_mode & 0o777, 0o700)
+        shutil.rmtree(base)
+        outside = self.base / 'outside'
+        outside.mkdir()
+        base.symlink_to(outside, target_is_directory=True)
+        out = self.call('codex', 'both', 'PreToolUse', tool_name='spawn_agent',
+                        tool_input={'model': 'gpt-6.2-sol', 'reasoning_effort': 'max'})
+        self.assertEqual(out['hookSpecificOutput']['permissionDecision'], 'deny')
+        self.assertEqual(list(outside.iterdir()), [])
 
 
 if __name__ == '__main__':

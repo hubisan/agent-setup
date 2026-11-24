@@ -23,7 +23,7 @@ BLOCKING = {'PreToolUse', 'PreModelSwitch'}
 MAX_INPUT = 2 * 1024 * 1024
 MAX_DAY = 5 * 1024 * 1024
 ASTRA = ('astra', 'gpt-6-astra', 'gpt-6.2-astra')
-USAGE_FIELDS = ('input_tokens', 'cached_input_tokens', 'output_tokens',
+USAGE_FIELDS = ('input_tokens', 'cached_input_tokens', 'cache_write_input_tokens', 'output_tokens',
                 'reasoning_output_tokens', 'total_tokens')
 
 
@@ -187,6 +187,9 @@ def response(obs, policy):
         return {'hookSpecificOutput': {'hookEventName': event,
                                       'permissionDecision': 'deny',
                                       'permissionDecisionReason': 'Agent Setup: ' + reason}}
+    if event == 'PreModelRequest' and verdict != 'violation':
+        # Diagnostic-only hook: don't repeat an unknown-effort message on every attempt.
+        return {}
     if verdict != 'within-observed-policy':
         return {'systemMessage': 'Agent Setup: ' + reason + '; effective routing not verified.'}
     return {}

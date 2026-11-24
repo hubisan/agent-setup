@@ -467,5 +467,26 @@ runpy.run_path(script, run_name='__main__')
             self.assertIn('systemMessage', json.loads(result.stdout))
 
 
+    def test_hook_script_resolves_in_linked_worktree_with_spaces(self):
+        self.init_git()
+        subprocess.run(['git', '-C', str(self.target), '-c', 'user.name=Fixture',
+                        '-c', 'user.email=fixture@example.invalid',
+                        'commit', '--allow-empty', '-qm', 'Fixture'], check=True)
+        worktree = self.base / 'linked worktree'
+        subprocess.run(['git', '-C', str(self.target), 'worktree', 'add', '--detach',
+                        str(worktree)], check=True, capture_output=True)
+        self.target = worktree
+        self.install('--modules', 'acs', '--guard-providers', 'codex,claude-code')
+        nested = self.target / 'nested'
+        nested.mkdir()
+        for path in ('.codex/hooks.json', '.claude/settings.json'):
+            command = json.loads(self.read(path))['hooks']['SessionStart'][0]['hooks'][0]['command']
+            result = subprocess.run(command, shell=True, cwd=nested, capture_output=True, text=True,
+                                    input='{"hook_event_name":"SessionStart"}',
+                                    env={**os.environ, 'CLAUDE_PROJECT_DIR': str(self.target)}, timeout=3)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('systemMessage', json.loads(result.stdout))
+
+
 if __name__ == '__main__':
     unittest.main()
