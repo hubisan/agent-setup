@@ -39,6 +39,8 @@ A model's self-report, token count, or configuration file alone is not runtime v
 
 Measure total task cost where available: coordinator and delegates, repeated context, reasoning/output, retries, and review. Compare equivalent completion quality and risk, not only the cheapest individual call. Record subscription/credit observations separately from API prices; do not present one as the other. No numeric savings are claimed by this implementation.
 
+Optional deterministic [hooks](hooks.md) can expose observable requests that diverge from this policy. They do not verify hidden model/effort values, escalation approval or complete runtime routing. The coordinator remains host-selected; neither hook changes models or permissions. Use the existing explicit approval and audit workflow.
+
 ## Profile commands
 
 Requires Python 3.11+; no external packages. Run from this repository:

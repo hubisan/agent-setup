@@ -41,6 +41,17 @@ python3 scripts/install.py status --target "$TARGET"
 
 An absent, incorrect or stale approval fails before writing. The installer never runs a host, a skill script, Git commit, or remote operation against the target. A repeated identical installation has no changes.
 
+## Optional coding hooks (#16)
+
+Both hooks are disabled on first installation. Select guard and telemetry independently for ACS and the selected providers, for example:
+
+```bash
+python3 scripts/install.py preview --target "$TARGET" --modules acs \
+  --guard-providers codex,claude-code --telemetry-providers codex
+```
+
+Use the same flags for apply with the approved digest. Use `none` for either feature to remove its registrations. Existing selections are retained on update for hosts that remain selected. Stop the coding clients before changing registrations. Codex requires a Git worktree root and refuses existing inline hooks in `.codex/config.toml`; Claude uses `.claude/settings.json`. Only exact managed groups are owned. Unrelated settings and file permissions are retained, though changed JSON is reformatted. Duplicate keys, unowned runtime references and changed managed groups block installation. Review the normal host trust prompts, never bypass them. See [hook contracts, storage and open verification gates](hooks.md). No live compatibility or complete enforcement is claimed.
+
 ## 4. Inspect and verify
 
 Review the resulting Git diff and new files. Only the marked block in an existing instruction file is managed; other bytes and the original mode are retained. A standalone `@AGENTS.md` or `@./AGENTS.md` import outside a fenced example is recognised in an existing `CLAUDE.md`, so it need not be duplicated. A missing Claude import is added as a managed block. Unrelated instructions and files remain yours. A root `AGENTS.override.md` blocks Codex installation instead of silently bypassing it.

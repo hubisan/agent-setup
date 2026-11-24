@@ -24,3 +24,7 @@ Reference target: a current CLI supporting custom agents with per-agent effort; 
 ## Audit scope
 
 Run the CLI check with sanitized inventories and observed configuration as described in [model policy](../docs/models.md#check-target-capability-and-overrides). It tests declared resolutions and overrides and a small set of current-process environment selectors. It does not introspect another process, automatically merge arbitrary host configuration, block native spawn calls or prove that hidden or managed settings were inspected. Do not label a profile as host-verified from the static audit. Keep any unavailable host checks open in #2 or #5 as appropriate. Runtime verification and cost comparison are part of #5.
+
+## Optional hook verification (#16)
+
+See [hook contracts and limitations](../docs/hooks.md). On each selected target, inspect all hook sources, project trust, managed policy, and duplicate registrations; verify the command's actual resolved path in a nested directory and linked worktree. Record actual client versions and sanitized event payloads, denial versus observation, unsupported fields, timeouts, and timing. A fixture or trusted config is not evidence that a hook ran. Do not enable native monitoring or external exporters without explicit consent.
