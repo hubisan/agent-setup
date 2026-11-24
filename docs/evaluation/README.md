@@ -21,6 +21,6 @@ Use the [result template](result-template.md) per comparison. A [local example](
 | Normal | Bounded behaviour implemented, focused tests, documentation impact, independent review |
 | Complex | Risk addressed, appropriate plan/scope, required tests and independent review, correction/escalation boundary observed |
 
-Use the same cases across comparable host/profile runs. Do not compare Claude credits directly to Codex credits as if interchangeable.
+Use the [fixed ACS pilot fixture, tasks and run guide](pilot/README.md) for comparable host/profile runs. Do not compare Claude credits directly to Codex credits as if interchangeable.
 
 Optional hook records from #16 can supplement the pilot: see [hook event scope and limitations](../hooks.md). Keep model requests, spawn notifications, configured capability versions and actual runtime evidence distinct. Record missing usage as unknown; do not add session totals to per-attempt counters or assume that an API cost estimate is a subscription charge.
