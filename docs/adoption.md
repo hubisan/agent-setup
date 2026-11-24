@@ -45,7 +45,9 @@ An absent, incorrect or stale approval fails before writing. The installer never
 
 Review the resulting Git diff and new files. Only the marked block in an existing instruction file is managed; other bytes and the original mode are retained. A standalone `@AGENTS.md` or `@./AGENTS.md` import outside a fenced example is recognised in an existing `CLAUDE.md`, so it need not be duplicated. A missing Claude import is added as a managed block. Unrelated instructions and files remain yours. A root `AGENTS.override.md` blocks Codex installation instead of silently bypassing it.
 
-The target state in `.agent-setup/state.json` records selection, source commit (if available), generated-content SHA-256, and owned blocks/files. Keep it with the installed files in version control; do not delete it to bypass a conflict. State is local configuration, not a runtime record.
+The provider-neutral files live under `.agents/`: ACS uses `.agents/WORKFLOW.md` and `.agents/models.md`, while installer state and per-provider profile plans live under `.agents/setup/`. These paths are our organisation convention, not an automatic host discovery standard; the workflow is linked from `AGENTS.md`. Native subagent definitions remain in their provider directories. No extra `.agents/agents/` copy is created.
+
+The target state in `.agents/setup/state.json` records selection, source commit (if available), generated-content SHA-256, and owned blocks/files. Keep it with the installed files in version control; do not delete it to bypass a conflict. State is local configuration, not a runtime record.
 
 | Host | Project locations |
 | --- | --- |
@@ -54,7 +56,7 @@ The target state in `.agent-setup/state.json` records selection, source commit (
 
 Sources: [Codex instructions](https://developers.openai.com/codex/guides/agents-md), [Codex skills](https://developers.openai.com/api/reference/cli), [Codex subagents](https://developers.openai.com/codex/subagents), [Claude Code skills](https://code.claude.com/docs/en/skills), [Claude Code subagents](https://code.claude.com/docs/en/sub-agents), [Claude Code memory/imports](https://code.claude.com/docs/en/memory). These paths are documentation-based. The installer copies regular files; it does not install or traverse symlinks, hard links, special files or Git metadata. No symlink-based update or shared writable skill directories. Local platform tests are not client-discovery proof.
 
-Before starting an actual coding session, complete the outstanding profile checks in #2 and follow the [host verification guide](../providers/README.md). Confirm effective settings, model/effort, discovered instructions, skills and delegates, including nested/global instructions, settings and provider overrides. Start a new session after changes. The generated profile plan is in `.agent-setup/profile-<provider>.json`. To supply a sanitized inventory, pass `--codex-capabilities PATH` or `--claude-capabilities PATH`; only provider, version and models are accepted. These inventories are saved in state for repeatability. Use `none` instead of a path to clear an inventory, and refresh it when the client changes. Do not include credentials. Without an inventory the plan is documentation-based. `status` verifies managed files and blocks, not actual discovery, effective routing, or all unrelated files.
+Before starting an actual coding session, complete the outstanding profile checks in #2 and follow the [host verification guide](../providers/README.md). Confirm effective settings, model/effort, discovered instructions, skills and delegates, including nested/global instructions, settings and provider overrides. Start a new session after changes. The generated profile plan is in `.agents/setup/profile-<provider>.json`. To supply a sanitized inventory, pass `--codex-capabilities PATH` or `--claude-capabilities PATH`; only provider, version and models are accepted. These inventories are saved in state for repeatability. Use `none` instead of a path to clear an inventory, and refresh it when the client changes. Do not include credentials. Without an inventory the plan is documentation-based. `status` verifies managed files and blocks, not actual discovery, effective routing, or all unrelated files.
 
 ## 5. Update, change selection or remove
 
@@ -67,11 +69,11 @@ python3 scripts/install.py preview --target "$TARGET" --remove
 python3 scripts/install.py apply --target "$TARGET" --remove --approve APPROVAL_FROM_PREVIEW
 ```
 
-The installer removes its unchanged files and exact instruction blocks. It never recursively removes directories; empty directories may remain. If a managed file or block was edited or removed, or an unowned destination or skill-directory file exists, the entire plan fails with the path. Preserve the local work: copy it to a separate file, inspect the previous committed/generated version and reconcile differences. Restore the recorded managed content or move the colliding unowned file to a safe location after reviewing it, then preview again. Do not force an overwrite or delete the state to claim an existing file.
+The installer removes its unchanged files and exact instruction blocks. Existing unrelated `.agents/` contents are preserved. If an earlier unmerged installer draft left `.agent-setup/state.json` or `.agent-setup/pending.json`, use that draft to recover/remove its managed installation before adopting this layout; do not delete its state to bypass the check. It never recursively removes directories; empty directories may remain. If a managed file or block was edited or removed, or an unowned destination or skill-directory file exists, the entire plan fails with the path. Preserve the local work: copy it to a separate file, inspect the previous committed/generated version and reconcile differences. Restore the recorded managed content or move the colliding unowned file to a safe location after reviewing it, then preview again. Do not force an overwrite or delete the state to claim an existing file.
 
 ## 6. Recover an interrupted change
 
-During apply, `.agent-setup/pending.json` is a private, mode-0600 recovery journal containing before/after file bytes, including any affected existing instructions. Never commit or share this file. If an application fails after journal creation, stop; do not apply another plan. Run:
+During apply, `.agents/setup/pending.json` is a private, mode-0600 recovery journal containing before/after file bytes, including any affected existing instructions. Never commit or share this file. If an application fails after journal creation, stop; do not apply another plan. Run:
 
 ```bash
 python3 scripts/install.py recover --target "$TARGET"

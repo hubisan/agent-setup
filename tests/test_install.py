@@ -11,8 +11,8 @@ import tomllib
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-STATE = '.agent-setup/state.json'
-PENDING = '.agent-setup/pending.json'
+STATE = '.agents/setup/state.json'
+PENDING = '.agents/setup/pending.json'
 
 
 class InstallerTest(unittest.TestCase):
@@ -106,14 +106,17 @@ runpy.run_path(script, run_name='__main__')
         self.assertFalse(list(self.target.iterdir()))
         self.assertEqual(preview['selection']['modules'], ['aps'])
         self.assertEqual(preview['selection']['skills'], [])
-        self.assertEqual(preview['directories_to_create'], ['.agent-setup'])
+        self.assertEqual(preview['directories_to_create'], ['.agents', '.agents/setup'])
         self.assertEqual({r['path'] for r in preview['changes']}, {'AGENTS.md', 'CLAUDE.md', STATE})
         self.cli('apply', '--approve', preview['approval'])
         self.assertIn(b'Shared project workflow', self.read('AGENTS.md'))
         self.assertIn(b'@AGENTS.md', self.read('CLAUDE.md'))
         self.assertFalse((self.target / '.codex').exists())
         self.assertFalse((self.target / '.claude').exists())
-        self.assertFalse((self.target / '.agents').exists())
+        self.assertFalse((self.target / '.agents/skills').exists())
+        self.assertFalse((self.target / '.agents/WORKFLOW.md').exists())
+        self.assertFalse((self.target / '.agents/models.md').exists())
+        self.assertFalse((self.target / '.agent-setup').exists())
         self.assertEqual(len(self.state()['source']['content_sha256']), 64)
         self.assertTrue(self.cli('status')['installed'])
         before = self.tree()
@@ -158,14 +161,14 @@ runpy.run_path(script, run_name='__main__')
         self.assertEqual(plan['requested']['profile'], 'balanced')
         self.assertEqual(len(list((self.target / '.codex/agents').glob('acs-*.toml'))), 9)
         self.assertEqual(len(list((self.target / '.claude/agents').glob('acs-*.md'))), 9)
-        self.assertIn(b'.agent-setup/WORKFLOW.md', self.read('AGENTS.md'))
-        self.assertNotIn(b'../../docs/models.md', self.read('.agent-setup/WORKFLOW.md'))
-        policy = self.read('.agent-setup/models.md')
+        self.assertIn(b'.agents/WORKFLOW.md', self.read('AGENTS.md'))
+        self.assertNotIn(b'../../docs/models.md', self.read('.agents/WORKFLOW.md'))
+        policy = self.read('.agents/models.md')
         self.assertIn(b'Sonnet is capped at high and Opus at medium', policy)
         self.assertIn(b'Opus low is reserved for user-approved escalation', policy)
         self.assertNotIn(b'## Profile commands', policy)
         for host in ('codex', 'claude-code'):
-            expected = json.loads(self.read(f'.agent-setup/profile-{host}.json'))
+            expected = json.loads(self.read(f'.agents/setup/profile-{host}.json'))
             self.assertEqual(expected['profile'], 'balanced')
             self.assertEqual(expected['evidence'], 'configured')
         reviewer = tomllib.loads(self.read('.codex/agents/acs-reviewer.toml').decode())
@@ -174,10 +177,10 @@ runpy.run_path(script, run_name='__main__')
         self.install('--profile', 'quality', '--providers', 'claude-code')
         self.assertEqual(list((self.target / '.codex/agents').glob('acs-*.toml')), [])
         self.assertEqual(self.read('.codex/agents/user.toml'), before['.codex/agents/user.toml'][0])
-        self.assertFalse((self.target / '.agent-setup/profile-codex.json').exists())
-        self.assertEqual(json.loads(self.read('.agent-setup/profile-claude-code.json'))['profile'], 'quality')
+        self.assertFalse((self.target / '.agents/setup/profile-codex.json').exists())
+        self.assertEqual(json.loads(self.read('.agents/setup/profile-claude-code.json'))['profile'], 'quality')
         self.install('--modules', 'aps')
-        self.assertFalse((self.target / '.agent-setup/WORKFLOW.md').exists())
+        self.assertFalse((self.target / '.agents/WORKFLOW.md').exists())
         self.assertEqual(list((self.target / '.claude/agents').glob('acs-*.md')), [])
         self.install('--remove')
         self.assertEqual(self.tree(), before)
@@ -190,14 +193,14 @@ runpy.run_path(script, run_name='__main__')
                 'gpt-6.1-terra': ['medium', 'high'],
                 'gpt-6.2-sol': ['low', 'medium']}}))
         self.install('--modules', 'acs', '--providers', 'codex', '--codex-capabilities', inventory)
-        plan = json.loads(self.read('.agent-setup/profile-codex.json'))
+        plan = json.loads(self.read('.agents/setup/profile-codex.json'))
         fallback = [r for r in plan['roles'].values() if r['requested_effort'] == 'max']
         self.assertTrue(fallback)
         self.assertTrue(all(r['effort'] == 'xhigh' for r in fallback))
         inventory.unlink()
         self.assertEqual(self.cli('preview')['changes'], [])
         self.install('--codex-capabilities', 'none')
-        self.assertIsNone(json.loads(self.read('.agent-setup/profile-codex.json'))['capability_version'])
+        self.assertIsNone(json.loads(self.read('.agents/setup/profile-codex.json'))['capability_version'])
 
     def test_selection_and_accepted_fixture_update_remove(self):
         self.fixture_source()
@@ -303,6 +306,43 @@ runpy.run_path(script, run_name='__main__')
         self.assertEqual(secret.read_bytes(), b'Outside data')
         self.assertEqual(list(outside.iterdir()), [secret])
 
+    def test_shared_agents_directory_preserves_unrelated_files(self):
+        self.put('.agents/notes.md', b'Local notes')
+        self.put('.agents/setup/local.json', b'{"owner":"project"}')
+        self.put('.agents/skills/user-skill/SKILL.md', b'Existing skill')
+        before = self.tree()
+        self.install('--modules', 'acs', '--providers', 'codex')
+        self.assertTrue((self.target / '.agents/WORKFLOW.md').is_file())
+        self.assertTrue((self.target / '.agents/models.md').is_file())
+        self.assertTrue((self.target / '.agents/setup/profile-codex.json').is_file())
+        self.assertFalse((self.target / '.agents/agents').exists())
+        self.assertFalse((self.target / '.agents/setup/profile-claude-code.json').exists())
+        self.assertFalse((self.target / '.claude').exists())
+        self.assertFalse((self.target / '.agent-setup').exists())
+        self.assertEqual(self.cli('preview')['changes'], [])
+        self.install('--remove')
+        self.assertEqual(self.tree(), before)
+
+    def test_shared_directory_collisions_fail_before_writes(self):
+        self.put('.agents/WORKFLOW.md', b'Project-owned workflow')
+        before = self.tree()
+        self.assertIn('Unowned file collision', self.cli('preview', '--modules', 'acs', ok=False))
+        self.assertEqual(self.tree(), before)
+        (self.target / '.agents/WORKFLOW.md').unlink()
+        outside = self.base / 'outside-setup'
+        outside.mkdir()
+        (self.target / '.agents/setup').symlink_to(outside, target_is_directory=True)
+        self.assertIn('Symlink collision', self.cli('preview', ok=False))
+        self.assertEqual(list(outside.iterdir()), [])
+        (self.target / '.agents/setup').unlink()
+        for name in ('state.json', 'pending.json'):
+            with self.subTest(name=name):
+                path = self.put('.agent-setup/' + name, b'Old draft')
+                before = self.tree()
+                self.assertIn('Legacy draft state detected', self.cli('preview', ok=False))
+                self.assertEqual(self.tree(), before)
+                path.unlink()
+
     def test_recover_interrupted_non_coding_install(self):
         self.put('AGENTS.md', b'User instructions\n', 0o640)
         before = self.tree()
@@ -322,7 +362,7 @@ runpy.run_path(script, run_name='__main__')
         plan = self.cli('preview', '--profile', 'quality')
         self.assertIn('simulated interruption', self.cli(
             'apply', '--profile', 'quality', '--approve', plan['approval'], fail_at=STATE, ok=False))
-        agent = '.agent-setup/profile-codex.json'
+        agent = '.agents/setup/profile-codex.json'
         interrupted = self.read(agent)
         self.assertNotEqual(interrupted, before[agent][0])
         self.put(agent, b'New local change')

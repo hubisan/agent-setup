@@ -19,8 +19,8 @@ import tempfile
 import profile as profiles
 
 ROOT = Path(__file__).resolve().parents[1]
-STATE = '.agent-setup/state.json'
-PENDING = '.agent-setup/pending.json'
+STATE = '.agents/setup/state.json'
+PENDING = '.agents/setup/pending.json'
 START = b'<!-- agent-setup:begin -->'
 END = b'<!-- agent-setup:end -->'
 HOSTS = ('codex', 'claude-code')
@@ -52,8 +52,8 @@ def relative(path):
 def owned_path(path):
     parts = relative(path)
     permitted = (path in INSTRUCTIONS or path == STATE
-                 or path in ('.agent-setup/WORKFLOW.md', '.agent-setup/models.md',
-                             '.agent-setup/profile-codex.json', '.agent-setup/profile-claude-code.json')
+                 or path in ('.agents/WORKFLOW.md', '.agents/models.md',
+                             '.agents/setup/profile-codex.json', '.agents/setup/profile-claude-code.json')
                  or re.fullmatch(r'\.codex/agents/acs-[a-z0-9-]+\.toml', path)
                  or re.fullmatch(r'\.claude/agents/acs-[a-z0-9-]+\.md', path)
                  or (len(parts) >= 4 and parts[:2] in (('.agents', 'skills'), ('.claude', 'skills'))
@@ -264,17 +264,17 @@ def desired_files(requested, effective, accepted):
     if 'claude-code' in effective['providers']:
         blocks['CLAUDE.md'] = b'@AGENTS.md\n'
     if 'acs' in effective['modules']:
-        blocks['AGENTS.md'] += (b'\nFor coding work, read [.agent-setup/WORKFLOW.md](.agent-setup/WORKFLOW.md) '
+        blocks['AGENTS.md'] += (b'\nFor coding work, read [.agents/WORKFLOW.md](.agents/WORKFLOW.md) '
                                 b'and follow its adaptive scope and review rules.\n')
         workflow = (ROOT / 'modules/acs/WORKFLOW.md').read_text()
         workflow = workflow.replace('../../docs/models.md', 'models.md')
         policy = (ROOT / 'docs/models.md').read_text().split('\n## Profile commands\n')[0]
         policy = policy.replace('[the catalogue](../profiles/catalog.json)', 'the generated profile plans')
-        files['.agent-setup/WORKFLOW.md'] = Snapshot(workflow.encode())
-        files['.agent-setup/models.md'] = Snapshot((policy + '\n').encode())
+        files['.agents/WORKFLOW.md'] = Snapshot(workflow.encode())
+        files['.agents/models.md'] = Snapshot((policy + '\n').encode())
         for host in effective['providers']:
             result = profiles.plan(host, requested['profile'], requested['capabilities'].get(host))
-            files[f'.agent-setup/profile-{host}.json'] = Snapshot(json_bytes(result))
+            files[f'.agents/setup/profile-{host}.json'] = Snapshot(json_bytes(result))
             for path, content in profiles.native_files(result):
                 files[owned_path(path)] = Snapshot(content.encode())
     skill_roots = []
@@ -517,6 +517,11 @@ def main():
             require(not any((args.remove, args.modules, args.providers, args.skills, args.profile,
                              args.codex_capabilities, args.claude_capabilities)), 'Selection options require preview/apply')
         with target_lock(root):
+            # Earlier unmerged drafts used a different state directory. Never
+            # interpret one as a fresh target or abandon its recovery journal.
+            require(snapshot(root, '.agent-setup/state.json') is None
+                    and snapshot(root, '.agent-setup/pending.json') is None,
+                    'Legacy draft state detected; use its original installer to recover/remove before adoption')
             if args.command == 'recover':
                 report = recover(root)
             else:
