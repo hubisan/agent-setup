@@ -11,7 +11,8 @@ Foundation complete: repository boundaries, decisions, adaptive ACS contract, pr
 | P0 | [#2](https://github.com/hubisan/agent-setup/issues/2) | Validated profile schema and Codex/Claude Code adapters | Foundation |
 | P0 | [#3](https://github.com/hubisan/agent-setup/issues/3) | Selective, repeatable installation and safe updates | Profiles |
 | P0 | [#4](https://github.com/hubisan/agent-setup/issues/4) | Small repeatable evaluation protocol and evidence records | Foundation; can run alongside profile work |
-| P0 | [#5](https://github.com/hubisan/agent-setup/issues/5) | First usable ACS slice, exercised in both coding hosts | Profiles, installer, evidence protocol |
+| P0 | [#16](https://github.com/hubisan/agent-setup/issues/16) | Optional model-routing guard and local usage telemetry | Merged profile, installer and evidence implementations |
+| P0 | [#5](https://github.com/hubisan/agent-setup/issues/5) | First usable ACS slice, exercised in both coding hosts | Profiles, installer, evidence protocol, hook preparation (#16) |
 | P1 | [#6](https://github.com/hubisan/agent-setup/issues/6) | Supported selective ChatGPT package/install/update path | Installer, evidence protocol |
 | P1 | [#7](https://github.com/hubisan/agent-setup/issues/7) | Adapted clarify pilot with real form regression checks | ACS pilot and ChatGPT path |
 | P1 | [#8](https://github.com/hubisan/agent-setup/issues/8) | One evaluated APS documentation candidate | ACS pilot and evidence protocol |
