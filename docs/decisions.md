@@ -26,8 +26,12 @@ Baseline: 2026-11-24. Source: the owner's setup discussion, its clarification an
 | D18 | Apply the OpenAI instruction-design reference to every new or revised skill. | Keep task-specific guidance short and conditional, and test with the intended models. See [design gate](skill-design.md). |
 | D19 | Use Matt Pocock and Addy Osmani as selective inputs. | Borrow a method only for a concrete gap; no wholesale bundle or unmeasured benefit claim. |
 | D20 | Exclude a teaching/learning module. | The separate learning platform owns that work; no general `teach` skill or broad writing module is added here. |
+| D21 | Require recurring need and additional value for every skill. | Prefer scripts for deterministic work, guides for infrequent work, and workflow rules for binding routines. Reassess existing and proposed skills through the design gate. |
+| D22 | Do not develop `aps-adopt` as a skill. | Preserve the adoption requirements in the installer and an on-demand guide in #3; no discovery entry or target skill package. |
 
 Answer provenance: Q1–4 establish module/dependency/domain boundaries; Q5 explicitly excludes GTD skills now; Q6–10 establish selective installation, own evolution, individual validation, a new parallel repository, and three hosts; Q11–15 establish workflow-first coding, adaptive delegation, selective inspiration, both coding providers, and ACS/profile priority. Q16–20 were accepted through “übernehme deine Empfehlungen”: automatic classification, independent review, documentation on every task, one documentation skill, and adaptive tests. The question texts are not reconstructed from their answer letters alone.
+
+D21 and D22 reflect the owner's subsequent clarification on 2026-11-24. Other skill names remain candidates, not new approvals or rejections.
 
 ## Clarification-form feedback to retain
 

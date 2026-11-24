@@ -1,6 +1,6 @@
 # APS scope and candidate catalogue
 
-APS supplies reusable project methods for software and non-software work. These names define boundaries, not installed or accepted skills. The first delivery prioritises ACS workflow and profiles; accept APS candidates individually through the [design gate](../../docs/skill-design.md).
+APS supplies reusable project methods for software and non-software work. These names define method boundaries, not installed or accepted skills. Recurring use and incremental value are prerequisites for packaging; the [design gate](../../docs/skill-design.md) applies to every candidate. The first delivery prioritises ACS workflow and profiles; accept APS candidates individually through the [design gate](../../docs/skill-design.md).
 
 ## Initial candidates
 
@@ -26,9 +26,23 @@ APS supplies reusable project methods for software and non-software work. These 
 | `aps-brainstorm` | Generate alternatives when variety is useful. |
 | `aps-questionnaire` | Prepare targeted questions for another stakeholder; distinct from interviewing the current user. |
 | `aps-wayfinder` | Explore an uncertain, large goal across sessions using a map of decisions; distinct from a delivery roadmap. |
-| `aps-adopt` | Guide safe adoption in a particular project; do not duplicate the installer. |
 
-Reserved methods are not an instruction to create all these skills. Start one only when a concrete need and evaluation case justify it.
+Reserved methods are not an instruction to create all these skills. Start one only when the design gate justifies it.
+
+## Initial packaging assessment
+
+These are provisional design hypotheses, not measured usage or acceptance decisions. Revisit each in its actual use case before building a package.
+
+| Methods | First form to evaluate |
+| --- | --- |
+| Clarify, writing-docs, handoff, domain-modeling, project-review | Existing candidate issues: test recurring use and additional value against native behaviour or a short reference. |
+| Frame, analyze, solution-design, plan, validate, brainstorm | Native model capabilities and the shared workflow first. Package only a demonstrated recurring gap. |
+| Improve, research | Native capabilities or targeted reference first; test whether a recurring project-specific method needs more. |
+| Questionnaire, wayfinder | On-demand template or guide first; do not package solely because the method is reusable. |
+
+## Adoption is not a skill
+
+The owner rejected `aps-adopt` as a skill because project adoption is infrequent. [Installer #3](https://github.com/hubisan/agent-setup/issues/3) owns deterministic installation, updates and verification plus an on-demand adoption guide for existing project instructions and conflicts. Preserve the original [APS adoption scenarios](https://github.com/hubisan/agent-project-setup/issues/12). Do not add `aps-adopt` to discovery or duplicate the installer in agent instructions.
 
 ## Domain modelling depth
 
@@ -38,6 +52,6 @@ For software, load a coding reference to compare the agreed model with actual co
 
 ## ACS candidates and exclusions
 
-Bug/PR triage belongs to `acs-triage`, not `aps-triage`. Spec/ticket conversion, debugging, TDD, code review, architecture, prototypes, implementation, and merge-conflict help are possible ACS methods. They are not an approved install list: first test the lean workflow and promote only a demonstrated gap through [#12](https://github.com/hubisan/agent-setup/issues/12).
+Bug/PR triage belongs to `acs-triage`, not `aps-triage`. Spec/ticket conversion, debugging, TDD, code review, architecture, prototypes, implementation, and merge-conflict help are possible ACS methods. They are not an approved install list: first test native capabilities and the lean workflow, then promote only a demonstrated recurring gap through [#12](https://github.com/hubisan/agent-setup/issues/12).
 
 No `teach` module, broad `write` skill, Memento implementation, or GTD skills are included. Storage adapters must not recreate shared methods under another prefix.
