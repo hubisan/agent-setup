@@ -16,7 +16,7 @@ ACS depends on the APS shared contract. This does not mean installing every APS 
 
 ## Source layout
 
-The existing foundation contains `modules/aps/README.md`, `modules/acs/WORKFLOW.md`, and task-specific documentation under `docs/`. Profile tooling now lives in `profiles/catalog.json` and `scripts/profile.py`, with the two small native output adapters together in that script. Host capability notes live in `providers/README.md`; evaluation documents live in `docs/evaluation/`. The following broader layout remains a guide; absent paths are not shipped functionality:
+The shared installer is implemented in `scripts/install.py`; `core/manifest.json` declares module dependencies and accepted skills, and `core/APS.md` is the minimal shared contract. The existing foundation contains `modules/aps/README.md`, `modules/acs/WORKFLOW.md`, and task-specific documentation under `docs/`. Profile tooling now lives in `profiles/catalog.json` and `scripts/profile.py`, with the two small native output adapters together in that script. Host capability notes live in `providers/README.md`; evaluation documents live in `docs/evaluation/`. The following broader layout remains a guide; absent paths are not shipped functionality:
 
 | Planned path | Contents |
 | --- | --- |
@@ -27,13 +27,13 @@ The existing foundation contains `modules/aps/README.md`, `modules/acs/WORKFLOW.
 | `providers/` | Host capability notes; split adapter code by host only when it grows |
 | `scripts/`, `tests/` | Only the implementation and meaningful checks needed by those features |
 
-Do not expose all source candidates to automatic discovery. A manifest should describe selected modules/skills and their minimal transitive dependencies. The installer must explain required additions or reject an invalid selection; it must not silently install the whole catalogue.
+Do not expose all source candidates to automatic discovery. The manifest declares accepted skills and dependencies; the installer records requested and effective selection. The installer must explain required additions or reject an invalid selection; it must not silently install the whole catalogue.
 
 ## Target ownership and updates
 
-Installation needs a preview, idempotence, recorded source version, and explicit ownership of generated files/blocks. Preserve existing instructions, Org/Markdown organisation, unrelated skills, and local modifications. Detect conflicting edits and show a concrete resolution rather than overwrite. Define update, removal, and recovery together; test repeated installation and a locally edited target.
+The [adoption guide](adoption.md) defines the preview/approval, idempotence, version and ownership workflow. Implementation choices: copy regular files into project-local host paths; use `.agents/` for shared target documents and `.agents/setup/` for state, profile plans and the private recoverable transaction journal. Reference shared workflow files from `AGENTS.md`; their paths are a local convention, not a native discovery standard. Generate native roles in `.codex/agents/` and `.claude/agents/` from the shared profile catalogue, without a third role copy. Preserve existing instructions, Org/Markdown organisation, unrelated skills, and local modifications. Detect conflicting edits and show a concrete resolution rather than overwrite. Define update, removal, and recovery together; test repeated installation and a locally edited target.
 
-Canonical skill content has one source. Provider-specific output is derived rather than maintained as independent method copies. Supported discovery paths, copy/symlink behaviour, and configuration precedence must be checked against the current host before implementation.
+Canonical skill content has one source. Provider-specific output is derived rather than maintained as independent method copies. Documented discovery paths are used; copies avoid writable cross-project symlink targets. Actual discovery and configuration precedence remain host-pilot checks.
 
 ## Provider capability boundary
 

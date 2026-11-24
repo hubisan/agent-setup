@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "modules": {
+    "aps": {
+      "requires": []
+    },
+    "acs": {
+      "requires": [
+        "aps"
+      ]
+    }
+  },
+  "skills": {}
+}
