@@ -29,6 +29,16 @@ Describe the user problem, trigger and exclusions, necessary inputs, useful resu
 
 Keep the description short enough to distinguish the trigger. Keep `SKILL.md` focused; link coding-specific or host-specific detail with explicit read conditions. Avoid duplicating core policy, instructions the agent already follows, or the same method across APS and ACS. Record the source, adopted ideas, changes, and required notices when deriving material.
 
+## Required skill-creator checks
+
+For every new or materially revised APS/ACS skill:
+
+1. Use ChatGPT's `skill-creator` when designing, authoring and validating the package. Follow the relevant host packaging and validation rules.
+2. Review the resulting skill in a fresh Claude session with Claude's `/skill-creator`. Verify that the installed command is available before invoking it. Review triggers, exclusions, instruction clarity, context cost, references, package structure and representative tests. Record the review findings and correct material defects.
+3. Record both checks in the candidate issue or linked evidence: reviewed revision, actual host and skill-creator version when available, invocation, findings, corrections and checks that remain open.
+
+Use the native tools in their respective hosts. If a host or its skill-creator is unavailable, record the blocker and leave that check open. A self-review, a read of the skill-creator instructions, or a static package check alone is not evidence of an actual second-host review. Complete both checks before candidate acceptance or release. These are development checks, not skills to install in every target project. Retain independent review, live activation/behaviour tests, cost comparison and explicit owner acceptance below.
+
 ## Acceptance evidence
 
 | Question | Minimum useful evidence |
