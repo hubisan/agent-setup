@@ -21,6 +21,9 @@ Issues own the detailed scope, dependencies and acceptance criteria. See [#1](ht
 
 - [ ] **Git conventions** — Add the optional branch/commit checks, concise root guardrail and remote enforcement option; verify Claude Web compatibility first. [#20](https://github.com/hubisan/agent-setup/issues/20)
 
+- [ ] **Project TODO overview** — Provide a compact Markdown or Org-mode task list for every project. [#24](https://github.com/hubisan/agent-setup/issues/24)
+- [ ] **Setup wizard** — Guide project setup in Bash and support a default profile with task-specific selection. [#25](https://github.com/hubisan/agent-setup/issues/25)
+
 ### Distribution
 
 - [ ] **ChatGPT integration** — Verify selective APS installation, updates, removal and discovery for coding and non-coding projects. [#6](https://github.com/hubisan/agent-setup/issues/6)
