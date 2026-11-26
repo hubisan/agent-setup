@@ -14,6 +14,7 @@ Use the active issue and its acceptance criteria as the work contract. Reuse set
 ## Working agreements
 
 - Keep instructions and repository documentation in English. Use the user's language in conversation and preserve existing target-project language and Org/Markdown conventions.
+- Write issues and documentation by audience: use `simple-english` for people and `writing-for-agents` for agents when available. In mixed documents, put the human summary and next action first, then the agent contract. Keep shared facts in one source. Use the combined `aps-writing-docs` after acceptance (#8).
 - Resolve routine reversible implementation choices within the authorised task. Record material agent-selected choices separately from user decisions. Complete the active scope; do not automatically start another roadmap issue.
 - Keep context targeted and outputs compact. Do not bulk-load skill directories or historical decisions.
 - Preserve user-owned target files and instructions. Do not modify the two source repositories as part of work here.
