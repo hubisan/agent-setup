@@ -19,10 +19,11 @@ Issues own the detailed scope, dependencies and acceptance criteria. See [#1](ht
 
 ### Project setup and Git
 
-- [ ] **Git conventions** — Add the optional branch/commit checks, concise root guardrail and remote enforcement option; verify Claude Web compatibility first. [#20](https://github.com/hubisan/agent-setup/issues/20)
-
+- [ ] **Git conventions** — Add the optional branch/commit checks, concise root guardrail and remote enforcement option. Verify Claude Web compatibility first. [#20](https://github.com/hubisan/agent-setup/issues/20)
 - [ ] **Project TODO overview** — Provide a compact Markdown or Org-mode task list for every project. [#24](https://github.com/hubisan/agent-setup/issues/24)
-- [ ] **Setup wizard** — Guide project setup in Bash and support a default profile with task-specific selection. [#25](https://github.com/hubisan/agent-setup/issues/25)
+- [ ] **Task tracking** — Support GitHub, Forgejo and local issue files, with future GTD compatibility. [#26](https://github.com/hubisan/agent-setup/issues/26)
+- [ ] **Setup wizard** — Choose project and code languages, install APS/ACS, add ACS later and select profiles. [#25](https://github.com/hubisan/agent-setup/issues/25)
+- [ ] **Repository wizard** — Create GitHub, Forgejo or local Git repositories. [#27](https://github.com/hubisan/agent-setup/issues/27)
 
 ### Distribution
 
