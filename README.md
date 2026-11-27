@@ -14,7 +14,7 @@ This is a new, parallel repository. [coding-agent-setup](https://github.com/hubi
 | --- | --- | --- |
 | Shared core | Installation, configuration, provider adapters, and evidence conventions | Profile tooling, installer and evidence protocol |
 | APS | Reusable project methods for software and non-software work | [Boundaries and candidate catalogue](modules/aps/README.md) |
-| ACS | Coding workflow and optional specialised methods; depends on APS | [Adaptive workflow](modules/acs/WORKFLOW.md) |
+| ACS | Coding workflow and optional specialised methods; depends on APS | [Adaptive workflow](modules/acs/WORKFLOW.md) and [candidate catalogue](modules/acs/README.md) |
 | GTD | Optional future module for reusable task practices | Reserved boundary only; no skills planned now |
 
 Memento and its `mem-*` adapters remain in the Memento repository. Teaching and learning are outside this setup.
