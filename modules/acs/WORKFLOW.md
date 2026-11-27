@@ -20,6 +20,10 @@ The coordinator owns the active contract and integration. Use the matching `acs-
 
 Use the narrowest meaningful checks for changed behaviour and risks. TDD is useful for suitable logic changes and regression reproduction; it is not a mandatory skill or ceremony. Run broader checks for an affected integration risk or a required repository gate. Do not repeat successful testing without a concrete reason. State unavailable checks as unrun.
 
+## Command output
+
+Use the quietest reliable command output by default. For routine commands, prefer summaries and relevant results over progress logs, command echoes or per-test success lines. Preserve exit codes, warnings, failure details and required evidence. Configure shared project commands (for example `make ci`) to be concise by default, with detailed diagnostics available on demand. Keep full logs outside the agent context when useful. Read only relevant sections, and avoid rerunning commands solely to recover suppressed diagnostics.
+
 ## Test scope
 
 Choose test scope by the risk of the change, not a fixed test count. Before adding a test, identify the concrete defect that it can detect. If no distinct defect is identifiable, reuse existing coverage or omit the test.
