@@ -20,6 +20,23 @@ The coordinator owns the active contract and integration. Use the matching `acs-
 
 Use the narrowest meaningful checks for changed behaviour and risks. TDD is useful for suitable logic changes and regression reproduction; it is not a mandatory skill or ceremony. Run broader checks for an affected integration risk or a required repository gate. Do not repeat successful testing without a concrete reason. State unavailable checks as unrun.
 
+## Command output
+
+Use the quietest reliable command output by default. For routine commands, prefer summaries and relevant results over progress logs, command echoes or per-test success lines. Preserve exit codes, warnings, failure details and required evidence. Configure shared project commands (for example `make ci`) to be concise by default, with detailed diagnostics available on demand. Keep full logs outside the agent context when useful. Read only relevant sections, and avoid rerunning commands solely to recover suppressed diagnostics.
+
+## Test scope
+
+Choose test scope by the risk of the change, not a fixed test count. Before adding a test, identify the concrete defect that it can detect. If no distinct defect is identifiable, reuse existing coverage or omit the test.
+
+- Increase coverage for branching rules, calculations, permissions, state transitions, expensive failures and changes across multiple components.
+- Reduce new tests for trivial changes, pure wiring and behaviour that existing tests already cover.
+- Prefer tests of observable behaviour. Avoid duplicate cases, trivial getters, constants, pass-through code and tests that mainly verify mocks.
+- Add input variants when they cover distinct behaviour, meaningful boundaries or failure modes. Use parameterised tests for justified cases with shared test logic.
+
+Report material test omissions and their reasons briefly. Preserve required project checks and risk-based verification.
+
+## Documentation impact
+
 For every task, ask which documentation the change makes stale: user instructions, configuration, APIs, operations, setup guidance, or consequential decisions. Update the relevant existing source in the same change, or state why no documentation change is needed. Record an ADR only for a consequential trade-off or a decision that would otherwise be difficult to understand; do not manufacture ADRs for routine edits.
 
 ## Review and correction boundary
